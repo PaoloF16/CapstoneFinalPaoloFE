@@ -1,3 +1,4 @@
+// src/components/tables/CreateTableModal.tsx
 import React, { useState } from 'react';
 
 interface CreateTableModalProps {
@@ -13,12 +14,14 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   onSubmit,
   suggestedTableNumber,
 }) => {
+  // --- ESTADOS LOCALES ---
   const [tableNumber, setTableNumber] = useState<number>(suggestedTableNumber);
   const [capacity, setCapacity] = useState<number>(4);
   const [loading, setLoading] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
+  // --- MANEJADOR DE ENVÍO DE FORMULARIO ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -26,7 +29,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
       await onSubmit(tableNumber, capacity);
       onClose();
     } catch (err) {
-      console.error(err);
+      console.error('Error al crear mesa:', err);
     } finally {
       setLoading(false);
     }
@@ -35,12 +38,22 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-1">Agregar Nueva Mesa</h3>
-        <p className="text-xs text-gray-500 mb-4">Ingresa la información básica de la mesa</p>
+        
+        {/* --- CABECERA --- */}
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-800">Agregar Nueva Mesa</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
 
+        {/* --- FORMULARIO --- */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">
+            <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
               Número de Mesa
             </label>
             <input
@@ -54,7 +67,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">
+            <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
               Capacidad (N° de Personas)
             </label>
             <input
@@ -68,23 +81,25 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          {/* --- BOTONES DE ACCIÓN --- */}
+          <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Crear Mesa'}
             </button>
           </div>
         </form>
+
       </div>
     </div>
   );

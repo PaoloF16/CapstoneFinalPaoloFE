@@ -37,12 +37,14 @@ export const TableModal: React.FC<TableModalProps> = ({
 }) => {
   if (!isOpen || !table) return null;
 
+  // --- ESTADOS LOCALES ---
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentItems, setCurrentItems] = useState<OrderItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+  const [showPrebill, setShowPrebill] = useState<boolean>(false);
 
-  // Sincronizar el estado de los ítems con el pedido activo de la mesa
+  // --- SINCRONIZACIÓN DE ORDEN ACTIVA ---
   useEffect(() => {
     if (table?.currentOrder?.items) {
       setCurrentItems(table.currentOrder.items);
@@ -51,12 +53,14 @@ export const TableModal: React.FC<TableModalProps> = ({
     }
   }, [table]);
 
+  // --- FILTRADO DE CATALOGO DE PLATOS ---
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesCategory = selectedCategory === 'Todas' || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
+  // --- MANEJADORES DE ITEMS Y CANTIDADES ---
   const handleAddItem = (item: MenuItem) => {
     setCurrentItems((prev) => {
       const existing = prev.find((i) => i.product.id === item.id);
@@ -100,8 +104,9 @@ export const TableModal: React.FC<TableModalProps> = ({
     onClose();
   };
 
+  // --- CÁLCULO DE TOTAL ---
   const totalAmount = currentItems.reduce(
-    (acc, item) => acc + (item.product.price || item.unitPrice || 0) * item.quantity,
+    (acc, item) => acc + (item.product?.price || item.unitPrice || 0) * item.quantity,
     0
   );
 
@@ -110,24 +115,23 @@ export const TableModal: React.FC<TableModalProps> = ({
       <div className="fixed inset-0 z-40 flex justify-end bg-black/40 backdrop-blur-xs">
         <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
           
-          {/* Header */}
+          {/* --- CABECERA --- */}
           <div className="p-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
             <div>
-              {/* Corregido: tableNumber en lugar de table.number */}
               <h2 className="text-xl font-bold text-gray-800">Mesa #{table.tableNumber}</h2>
               <p className="text-sm text-gray-500">
-                Estado: <span className="font-semibold uppercase">{table.status}</span>
+                Capacidad: <strong className="text-gray-700">{table.capacity} pers.</strong> | Estado: <span className="font-semibold uppercase">{table.status}</span>
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2 text-2xl font-bold rounded-lg"
+              className="text-gray-400 hover:text-gray-600 p-2 text-2xl font-bold rounded-lg cursor-pointer"
             >
               ✕
             </button>
           </div>
 
-          {/* Body */}
+          {/* --- CUERPO PRINCIPAL --- */}
           {table.status === 'AVAILABLE' && currentItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mb-4 font-bold">
@@ -139,14 +143,15 @@ export const TableModal: React.FC<TableModalProps> = ({
               </p>
               <button
                 onClick={() => onOpenTable(table.id)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer"
               >
                 Abrir Mesa / Crear Pedido
               </button>
             </div>
           ) : (
             <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-              {/* Lista Consumos */}
+              
+              {/* --- LISTA DE CONSUMOS --- */}
               <div className="w-full md:w-1/2 p-4 border-r border-gray-200 overflow-y-auto flex flex-col justify-between">
                 <div>
                   <h3 className="font-bold text-gray-700 mb-3 text-base">Pedido Actual</h3>
@@ -166,13 +171,13 @@ export const TableModal: React.FC<TableModalProps> = ({
                               {item.product.name}
                             </p>
                             <p className="text-xs text-gray-500">
-                              S/ {(item.product.price || item.unitPrice).toFixed(2)} c/u
+                              S/ {(item.product.price || item.unitPrice || 0).toFixed(2)} c/u
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleUpdateQuantity(item.product.id, -1)}
-                              className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100"
+                              className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100 cursor-pointer"
                             >
                               -
                             </button>
@@ -181,7 +186,7 @@ export const TableModal: React.FC<TableModalProps> = ({
                             </span>
                             <button
                               onClick={() => handleUpdateQuantity(item.product.id, 1)}
-                              className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100"
+                              className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100 cursor-pointer"
                             >
                               +
                             </button>
@@ -192,7 +197,7 @@ export const TableModal: React.FC<TableModalProps> = ({
                   )}
                 </div>
 
-                {/* Total + Botón de Cobro */}
+                {/* --- TOTAL + BOTONES DE PRECUENTA Y COBRO --- */}
                 <div className="pt-4 border-t border-gray-200 mt-4 space-y-3">
                   <div className="flex justify-between items-center text-lg font-bold text-gray-900">
                     <span>Total:</span>
@@ -200,17 +205,27 @@ export const TableModal: React.FC<TableModalProps> = ({
                   </div>
 
                   {currentItems.length > 0 && (
-                    <button
-                      onClick={() => setIsCheckoutOpen(true)}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2"
-                    >
-                      💳 Procesar Cuenta / Cobrar
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowPrebill(true)}
+                        className="bg-gray-800 hover:bg-black text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        📄 Precuenta
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsCheckoutOpen(true)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        💳 Cobrar
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Catálogo */}
+              {/* --- CATÁLOGO DE PLATOS PARA AÑADIR --- */}
               <div className="w-full md:w-1/2 p-4 flex flex-col bg-gray-50/50 overflow-y-auto">
                 <h3 className="font-bold text-gray-700 mb-3 text-base">Añadir Platos</h3>
                 <input
@@ -225,7 +240,7 @@ export const TableModal: React.FC<TableModalProps> = ({
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1 rounded-full text-xs whitespace-nowrap font-medium transition-colors ${
+                      className={`px-3 py-1 rounded-full text-xs whitespace-nowrap font-medium transition-colors cursor-pointer ${
                         selectedCategory === cat
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
@@ -253,21 +268,22 @@ export const TableModal: React.FC<TableModalProps> = ({
                   ))}
                 </div>
               </div>
+
             </div>
           )}
 
-          {/* Actions */}
+          {/* --- ACCIONES INFERIORES --- */}
           {(table.status !== 'AVAILABLE' || currentItems.length > 0) && (
             <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveOrder}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-sm cursor-pointer"
               >
                 Guardar Pedido
               </button>
@@ -277,7 +293,52 @@ export const TableModal: React.FC<TableModalProps> = ({
         </div>
       </div>
 
-      {/* Modal de Pago / Cierre */}
+      {/* --- MODAL BORRADOR DE PRECUENTA --- */}
+      {showPrebill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs p-6 border border-gray-100 space-y-4">
+            <div className="text-center border-b pb-3">
+              <h4 className="font-extrabold text-base text-gray-900">TOTEAT RESTAURANT</h4>
+              <p className="text-xs text-gray-500">PRECUENTA / COMPROBANTE BORRADOR</p>
+              <p className="text-xs font-semibold text-gray-700 mt-1">Mesa #{table.tableNumber}</p>
+            </div>
+            
+            <div className="space-y-1.5 text-xs max-h-48 overflow-y-auto">
+              {currentItems.map((item) => (
+                <div key={item.product.id} className="flex justify-between">
+                  <span>{item.quantity}x {item.product.name}</span>
+                  <span className="font-medium">S/ {((item.product.price || item.unitPrice || 0) * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t pt-2 flex justify-between font-bold text-sm text-gray-900">
+              <span>TOTAL PRECUENTA:</span>
+              <span>S/ {totalAmount.toFixed(2)}</span>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setShowPrebill(false)}
+                className="w-1/2 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 cursor-pointer"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={() => {
+                  window.print();
+                  setShowPrebill(false);
+                }}
+                className="w-1/2 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black cursor-pointer"
+              >
+                🖨️ Imprimir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE PAGO / CHECKOUT --- */}
       <CheckoutModal
         table={{
           ...table,
