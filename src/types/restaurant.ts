@@ -20,6 +20,7 @@ export interface Table {
   number: number;
   capacity: number;
   status: TableStatus;
+  image?: string; // <-- Nueva propiedad opcional para la foto de la mesa
   currentOrder?: {
     id: string;
     items: OrderItem[];
