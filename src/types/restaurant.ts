@@ -49,3 +49,8 @@ export interface CheckoutDTO {
   discountValue?: number;
   discountType?: 'PERCENTAGE' | 'FIXED';
 }
+export interface ProductItem {
+  id: string;
+  name: string;
+  price: number;
+}

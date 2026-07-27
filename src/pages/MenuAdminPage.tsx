@@ -1,278 +1,252 @@
 // src/pages/MenuAdminPage.tsx
 import React, { useEffect, useState } from 'react';
-import type { MenuItem, Category, MenuItemFormData } from '../types/menu';
 import { menuService } from '../services/menuService';
-import ProductModal from '../components/menu/ProductModal';
-import { DeleteConfirmModal } from '../components/menu/DeleteConfirmModal';
+import { ProductModal } from '../components/menu/ProductModal';
+import { CategoryModal } from '../components/menu/CategoryModal';
+import type { MenuItem, Category, MenuItemFormData, CategoryFormData } from '../types/menu';
 
 export const MenuAdminPage: React.FC = () => {
+  // --- ESTADOS LOCALES ---
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // Modales
+  const [isProductModalOpen, setIsProductModalOpen] = useState<boolean>(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | null>(null);
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
-
-  const loadData = async () => {
-    setLoading(true);
+  // --- CARGA DE DATOS ---
+  const fetchData = async () => {
     try {
-      const [catsRes, prodsRes] = await Promise.all([
-        menuService.getCategories(),
+      setLoading(true);
+      const [productsData, categoriesData] = await Promise.all([
         menuService.getProducts(),
+        menuService.getCategories(),
       ]);
-      setCategories(catsRes);
-      setProducts(prodsRes);
+      setProducts(productsData);
+      setCategories(categoriesData);
     } catch (error) {
-      console.error('Error cargando carta:', error);
+      console.error('Error al cargar datos del menú:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    fetchData();
   }, []);
 
-  const handleCreateOrUpdate = async (data: MenuItemFormData) => {
+  // --- MANEJADORES DE CATEGORÍAS ---
+  const handleCreateCategory = async (formData: CategoryFormData) => {
+    await menuService.createCategory(formData);
+    await fetchData();
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (confirm('¿Seguro que deseas eliminar esta categoría?')) {
+      await menuService.deleteCategory(id);
+      await fetchData();
+    }
+  };
+
+  // --- MANEJADORES DE PRODUCTOS ---
+  const handleCreateOrUpdateProduct = async (formData: MenuItemFormData) => {
     if (editingProduct) {
-      const updated = await menuService.updateProduct(editingProduct.id, data);
-      setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      await menuService.updateProduct(editingProduct.id, formData);
     } else {
-      const created = await menuService.createProduct(data);
-      setProducts((prev) => [...prev, created]);
+      await menuService.createProduct(formData);
+    }
+    await fetchData();
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm('¿Seguro que deseas eliminar este producto?')) {
+      await menuService.deleteProduct(id);
+      await fetchData();
     }
   };
 
-  const handleDelete = async () => {
-    if (!deletingProductId) return;
-    try {
-      await menuService.deleteProduct(deletingProductId);
-      setProducts((prev) => prev.filter((p) => p.id !== deletingProductId));
-    } catch (error) {
-      console.error('Error al eliminar:', error);
-    }
+  const handleToggleAvailability = async (id: string, currentStatus: boolean) => {
+    await menuService.toggleAvailability(id, !currentStatus);
+    await fetchData();
   };
 
-  const handleToggleStatus = async (product: MenuItem) => {
-    try {
-      const updated = await menuService.toggleAvailability(product.id, !product.isAvailable);
-      setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-    } catch (error) {
-      console.error('Error al cambiar estado:', error);
-    }
-  };
-
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory = selectedCategory === 'ALL' || p.categoryId === selectedCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // --- FILTRADO DE PRODUCTOS ---
+  const filteredProducts = selectedCategoryId === 'ALL'
+    ? products
+    : products.filter((p) => p.categoryId === selectedCategoryId || p.category?.id === selectedCategoryId);
 
   return (
-    <div className="space-y-4 bg-gray-100 min-h-full p-4">
-      {/* Top Toteat Navigation Bar */}
-      <div className="bg-red-500 text-white rounded-lg p-3 flex flex-wrap items-center justify-between shadow-sm">
-        <div className="flex items-center gap-2 font-bold text-sm">
-          <span>Gestión de Productos / Carta</span>
+    <div className="p-6">
+      
+      {/* Encabezado */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Administración de Carta / Menú</h1>
+          <p className="text-sm text-gray-500">Crea categorías y gestiona la oferta gastronómica</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingProduct(null);
-            setIsModalOpen(true);
-          }}
-          className="bg-black hover:bg-gray-900 text-white px-4 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm"
-        >
-          + Agregar Producto
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="px-4 py-2 bg-gray-800 hover:bg-black text-white font-bold text-sm rounded-lg shadow-sm transition-colors cursor-pointer"
+          >
+            + Nueva Categoría
+          </button>
+          <button
+            onClick={() => {
+              if (categories.length === 0) {
+                alert('Debes crear al menos una categoría antes de añadir platos.');
+                setIsCategoryModalOpen(true);
+                return;
+              }
+              setEditingProduct(null);
+              setIsProductModalOpen(true);
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-lg shadow-sm transition-colors cursor-pointer"
+          >
+            + Añadir Plato
+          </button>
+        </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          <button
-            onClick={() => setSelectedCategory('ALL')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap ${
-              selectedCategory === 'ALL'
-                ? 'bg-red-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            TODOS
-          </button>
-          {categories.map((cat) => (
+      {/* Lista de Categorías Pill Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
+        <button
+          onClick={() => setSelectedCategoryId('ALL')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap ${
+            selectedCategoryId === 'ALL'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          Todas las categorías ({products.length})
+        </button>
+
+        {categories.map((cat) => (
+          <div key={cat.id} className="flex items-center gap-1">
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap ${
-                selectedCategory === cat.id
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              onClick={() => setSelectedCategoryId(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap ${
+                selectedCategoryId === cat.id
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              {cat.name.toUpperCase()}
+              {cat.name}
             </button>
-          ))}
-        </div>
-
-        <div className="w-full md:w-64">
-          <input
-            type="text"
-            placeholder="Filtrar por nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-red-500"
-          />
-        </div>
+            <button
+              onClick={() => handleDeleteCategory(cat.id)}
+              title="Eliminar categoría"
+              className="text-red-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
       </div>
 
-      {/* Products Table - Toteat Style */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-xs font-bold text-gray-400">
-            Cargando catálogo de productos...
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 uppercase font-bold text-[11px]">
-                  <th className="py-3 px-4">Producto</th>
-                  <th className="py-3 px-4">Categoría</th>
-                  <th className="py-3 px-4 text-right">Precio Actual</th>
-                  <th className="py-3 px-4 text-center">Etiquetas</th>
-                  <th className="py-3 px-4 text-center">Estado</th>
-                  <th className="py-3 px-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      !product.isAvailable ? 'bg-gray-50/50 opacity-60' : ''
+      {/* Grilla de Platos / Productos */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-400">Cargando la carta...</div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="bg-white p-12 text-center rounded-2xl border border-gray-200 max-w-md mx-auto">
+          <p className="text-gray-500 mb-4 font-medium">No hay platos registrados en esta categoría.</p>
+          <button
+            onClick={() => setIsProductModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg cursor-pointer"
+          >
+            + Crear Plato
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
+            >
+              <div className="p-4">
+                {product.imageUrl && (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-36 object-cover rounded-xl mb-3"
+                  />
+                )}
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-gray-800 text-base">{product.name}</h3>
+                  <span className="font-extrabold text-blue-600 text-base">
+                    S/ {product.price.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 line-clamp-2 mb-3">{product.description}</p>
+                <div className="flex gap-2 text-[10px]">
+                  {product.isGlutenFree && (
+                    <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">
+                      SIN GLUTEN
+                    </span>
+                  )}
+                  <span
+                    className={`px-2 py-0.5 rounded font-bold ${
+                      product.isAvailable
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {/* Item Info */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            product.imageUrl ||
-                            'https://via.placeholder.com/80?text=Food'
-                          }
-                          alt={product.name}
-                          className="w-10 h-10 object-cover rounded-md border border-gray-200"
-                        />
-                        <div>
-                          <p className="font-bold text-gray-800">{product.name}</p>
-                          <p className="text-[11px] text-gray-400 line-clamp-1 max-w-xs">
-                            {product.description}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                    {product.isAvailable ? 'Disponible' : 'Agotado'}
+                  </span>
+                </div>
+              </div>
 
-                    {/* Category */}
-                    <td className="py-3 px-4 text-gray-600 font-medium">
-                      {categories.find((c) => c.id === product.categoryId)?.name ||
-                        'General'}
-                    </td>
+              {/* Acciones del Plato */}
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                <button
+                  onClick={() => handleToggleAvailability(product.id, product.isAvailable)}
+                  className="text-xs font-bold text-gray-600 hover:text-black cursor-pointer"
+                >
+                  {product.isAvailable ? 'Pausar' : 'Activar'}
+                </button>
+                <div className="space-x-3">
+                  <button
+                    onClick={() => {
+                      setEditingProduct(product);
+                      setIsProductModalOpen(true);
+                    }}
+                    className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    className="text-xs font-bold text-red-500 hover:underline cursor-pointer"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-                    {/* Price */}
-                    <td className="py-3 px-4 text-right font-extrabold text-red-500">
-                      ${product.price.toLocaleString()}
-                      {product.originalPrice && (
-                        <span className="block text-[10px] text-gray-400 line-through font-normal">
-                          ${product.originalPrice.toLocaleString()}
-                        </span>
-                      )}
-                    </td>
+      {/* Modal para Crear Categoría */}
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onSubmit={handleCreateCategory}
+      />
 
-                    {/* Tags */}
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1 flex-wrap">
-                        {product.discountBadge && (
-                          <span className="bg-red-100 text-red-600 font-bold text-[9px] px-1.5 py-0.5 rounded">
-                            {product.discountBadge}
-                          </span>
-                        )}
-                        {product.isNew && (
-                          <span className="bg-amber-100 text-amber-700 font-bold text-[9px] px-1.5 py-0.5 rounded">
-                            NUEVO
-                          </span>
-                        )}
-                        {product.isGlutenFree && (
-                          <span className="bg-emerald-100 text-emerald-700 font-bold text-[9px] px-1.5 py-0.5 rounded">
-                            SIN GLUTEN
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Availability */}
-                    <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => handleToggleStatus(product)}
-                        className={`px-2 py-1 rounded text-[10px] font-bold ${
-                          product.isAvailable
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                            : 'bg-gray-100 text-gray-500 border border-gray-200'
-                        }`}
-                      >
-                        {product.isAvailable ? 'ACTIVO' : 'PAUSADO'}
-                      </button>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-3 px-4 text-right space-x-1">
-                      <button
-                        onClick={() => {
-                          setEditingProduct(product);
-                          setIsModalOpen(true);
-                        }}
-                        className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-semibold"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeletingProductId(product.id);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-semibold"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Modals */}
+      {/* Modal para Crear / Editar Producto */}
       <ProductModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateOrUpdate}
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onSubmit={handleCreateOrUpdateProduct}
         initialData={editingProduct}
         categories={categories}
       />
 
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-      />
     </div>
   );
 };
-
-export default MenuAdminPage;

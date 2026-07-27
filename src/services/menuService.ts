@@ -1,12 +1,9 @@
 // src/services/menuService.ts
-
-// 1. Importación por defecto del cliente HTTP
 import api from './api';
-
-// 2. Importación exclusiva de tipos TypeScript
-import type { MenuItem, Category, MenuItemFormData } from '../types/menu';
+import type { MenuItem, Category, MenuItemFormData, CategoryFormData } from '../types/menu';
 
 export const menuService = {
+  // --- PRODUCTOS ---
   getProducts: async (categoryId?: string): Promise<MenuItem[]> => {
     try {
       const response = await api.get<MenuItem[]>('/products', {
@@ -14,28 +11,26 @@ export const menuService = {
       });
       return response.data || [];
     } catch (error) {
-      console.error('Error fetching products:', error);
-      return [];
-    }
-  },
-
-  getCategories: async (): Promise<Category[]> => {
-    try {
-      const response = await api.get<Category[]>('/categories');
-      return response.data || [];
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error al obtener productos:', error);
       return [];
     }
   },
 
   createProduct: async (data: MenuItemFormData): Promise<MenuItem> => {
-    const response = await api.post<MenuItem>('/products', data);
+    const payload = {
+      ...data,
+      category: { id: data.categoryId },
+    };
+    const response = await api.post<MenuItem>('/products', payload);
     return response.data;
   },
 
   updateProduct: async (id: string, data: Partial<MenuItemFormData>): Promise<MenuItem> => {
-    const response = await api.put<MenuItem>(`/products/${id}`, data);
+    const payload = {
+      ...data,
+      ...(data.categoryId ? { category: { id: data.categoryId } } : {}),
+    };
+    const response = await api.put<MenuItem>(`/products/${id}`, payload);
     return response.data;
   },
 
@@ -46,5 +41,30 @@ export const menuService = {
   toggleAvailability: async (id: string, isAvailable: boolean): Promise<MenuItem> => {
     const response = await api.patch<MenuItem>(`/products/${id}/availability`, { isAvailable });
     return response.data;
+  },
+
+  // --- CATEGORÍAS ---
+  getCategories: async (): Promise<Category[]> => {
+    try {
+      const response = await api.get<Category[]>('/categories');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error al obtener categorías:', error);
+      return [];
+    }
+  },
+
+  createCategory: async (data: CategoryFormData): Promise<Category> => {
+    const response = await api.post<Category>('/categories', data);
+    return response.data;
+  },
+
+  updateCategory: async (id: string, data: CategoryFormData): Promise<Category> => {
+    const response = await api.put<Category>(`/categories/${id}`, data);
+    return response.data;
+  },
+
+  deleteCategory: async (id: string): Promise<void> => {
+    await api.delete(`/categories/${id}`);
   },
 };

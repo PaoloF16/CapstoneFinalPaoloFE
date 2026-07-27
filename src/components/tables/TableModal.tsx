@@ -37,14 +37,14 @@ export const TableModal: React.FC<TableModalProps> = ({
 }) => {
   if (!isOpen || !table) return null;
 
-  // --- ESTADOS LOCALES ---
+  // Estados locales
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentItems, setCurrentItems] = useState<OrderItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [showPrebill, setShowPrebill] = useState<boolean>(false);
 
-  // --- SINCRONIZACIÓN DE ORDEN ACTIVA ---
+  // Sincronización del pedido activo
   useEffect(() => {
     if (table?.currentOrder?.items) {
       setCurrentItems(table.currentOrder.items);
@@ -53,14 +53,14 @@ export const TableModal: React.FC<TableModalProps> = ({
     }
   }, [table]);
 
-  // --- FILTRADO DE CATALOGO DE PLATOS ---
+  // Filtrado de menú
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesCategory = selectedCategory === 'Todas' || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  // --- MANEJADORES DE ITEMS Y CANTIDADES ---
+  // Manejo de ítems en el pedido
   const handleAddItem = (item: MenuItem) => {
     setCurrentItems((prev) => {
       const existing = prev.find((i) => i.product.id === item.id);
@@ -104,7 +104,6 @@ export const TableModal: React.FC<TableModalProps> = ({
     onClose();
   };
 
-  // --- CÁLCULO DE TOTAL ---
   const totalAmount = currentItems.reduce(
     (acc, item) => acc + (item.product?.price || item.unitPrice || 0) * item.quantity,
     0
@@ -115,7 +114,7 @@ export const TableModal: React.FC<TableModalProps> = ({
       <div className="fixed inset-0 z-40 flex justify-end bg-black/40 backdrop-blur-xs">
         <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
           
-          {/* --- CABECERA --- */}
+          {/* Header */}
           <div className="p-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
             <div>
               <h2 className="text-xl font-bold text-gray-800">Mesa #{table.tableNumber}</h2>
@@ -131,7 +130,7 @@ export const TableModal: React.FC<TableModalProps> = ({
             </button>
           </div>
 
-          {/* --- CUERPO PRINCIPAL --- */}
+          {/* Cuerpo */}
           {table.status === 'AVAILABLE' && currentItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mb-4 font-bold">
@@ -151,7 +150,7 @@ export const TableModal: React.FC<TableModalProps> = ({
           ) : (
             <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
               
-              {/* --- LISTA DE CONSUMOS --- */}
+              {/* Lista Consumos */}
               <div className="w-full md:w-1/2 p-4 border-r border-gray-200 overflow-y-auto flex flex-col justify-between">
                 <div>
                   <h3 className="font-bold text-gray-700 mb-3 text-base">Pedido Actual</h3>
@@ -197,7 +196,7 @@ export const TableModal: React.FC<TableModalProps> = ({
                   )}
                 </div>
 
-                {/* --- TOTAL + BOTONES DE PRECUENTA Y COBRO --- */}
+                {/* Total + Precuenta + Cobro */}
                 <div className="pt-4 border-t border-gray-200 mt-4 space-y-3">
                   <div className="flex justify-between items-center text-lg font-bold text-gray-900">
                     <span>Total:</span>
@@ -218,14 +217,14 @@ export const TableModal: React.FC<TableModalProps> = ({
                         onClick={() => setIsCheckoutOpen(true)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
                       >
-                        💳 Cobrar
+                        💳 Procesar Cuenta / Cobrar
                       </button>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* --- CATÁLOGO DE PLATOS PARA AÑADIR --- */}
+              {/* Catálogo de Platos */}
               <div className="w-full md:w-1/2 p-4 flex flex-col bg-gray-50/50 overflow-y-auto">
                 <h3 className="font-bold text-gray-700 mb-3 text-base">Añadir Platos</h3>
                 <input
@@ -272,7 +271,7 @@ export const TableModal: React.FC<TableModalProps> = ({
             </div>
           )}
 
-          {/* --- ACCIONES INFERIORES --- */}
+          {/* Acciones Inferiores */}
           {(table.status !== 'AVAILABLE' || currentItems.length > 0) && (
             <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
               <button
@@ -293,7 +292,7 @@ export const TableModal: React.FC<TableModalProps> = ({
         </div>
       </div>
 
-      {/* --- MODAL BORRADOR DE PRECUENTA --- */}
+      {/* Modal Borrador Precuenta */}
       {showPrebill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs p-6 border border-gray-100 space-y-4">
@@ -338,7 +337,7 @@ export const TableModal: React.FC<TableModalProps> = ({
         </div>
       )}
 
-      {/* --- MODAL DE PAGO / CHECKOUT --- */}
+      {/* Modal de Pago / Checkout */}
       <CheckoutModal
         table={{
           ...table,

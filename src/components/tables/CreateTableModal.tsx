@@ -14,14 +14,12 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   onSubmit,
   suggestedTableNumber,
 }) => {
-  // --- ESTADOS LOCALES ---
   const [tableNumber, setTableNumber] = useState<number>(suggestedTableNumber);
   const [capacity, setCapacity] = useState<number>(4);
   const [loading, setLoading] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
-  // --- MANEJADOR DE ENVÍO DE FORMULARIO ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -39,7 +37,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 border border-gray-100">
         
-        {/* --- CABECERA --- */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-gray-800">Agregar Nueva Mesa</h3>
           <button
@@ -50,7 +48,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
           </button>
         </div>
 
-        {/* --- FORMULARIO --- */}
+        {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
@@ -81,7 +79,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
             />
           </div>
 
-          {/* --- BOTONES DE ACCIÓN --- */}
+          {/* Acciones */}
           <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
             <button
               type="button"

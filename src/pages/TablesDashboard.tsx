@@ -24,23 +24,21 @@ interface LocalMenuItem {
 }
 
 export const TablesDashboard: React.FC = () => {
-  // --- ESTADOS LOCALES ---
+  // Estados locales
   const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal para agregar mesa
+  // Modales
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
-
-  // Modal para ver comanda de mesa
   const [selectedTable, setSelectedTable] = useState<ExtendedTable | null>(null);
   const [isTableModalOpen, setIsTableModalOpen] = useState<boolean>(false);
 
-  // Catálogo de productos y categorías para el pedido
+  // Carta de Menú
   const [menuItems, setMenuItems] = useState<LocalMenuItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
-  // --- CARGA DE DATOS DESDE EL BACKEND ---
+  // Cargar mesas
   const fetchTables = async () => {
     try {
       setLoading(true);
@@ -55,6 +53,7 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
+  // Cargar menú
   const fetchMenuData = async () => {
     try {
       const [products, cats] = await Promise.all([
@@ -81,7 +80,7 @@ export const TablesDashboard: React.FC = () => {
     fetchMenuData();
   }, []);
 
-  // --- MANEJADOR DE CLIC EN UNA MESA ---
+  // Clic en mesa
   const handleSelectTable = async (table: RestaurantTable) => {
     let order: Order | undefined = undefined;
 
@@ -97,7 +96,7 @@ export const TablesDashboard: React.FC = () => {
     setIsTableModalOpen(true);
   };
 
-  // --- CREAR NUEVA MESA ---
+  // Submit Crear Mesa
   const handleCreateTableSubmit = async (tableNumber: number, capacity: number) => {
     await createTable({
       tableNumber,
@@ -107,7 +106,7 @@ export const TablesDashboard: React.FC = () => {
     await fetchTables();
   };
 
-  // --- ACCIONES EN LA COMANDA DE LA MESA ---
+  // Abrir Mesa
   const handleOpenTable = async (tableId: string) => {
     try {
       const newOrder = await createOrder({ tableId, items: [] });
@@ -126,6 +125,7 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
+  // Actualizar Pedido
   const handleUpdateOrder = async (tableId: string, items: OrderItem[]) => {
     try {
       const itemRequests = items.map((i) => ({
@@ -151,6 +151,7 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
+  // Liberar / Cerrar Mesa tras el pago
   const handleCloseTable = async (_tableId: string) => {
     setIsTableModalOpen(false);
     setSelectedTable(null);
@@ -168,7 +169,7 @@ export const TablesDashboard: React.FC = () => {
   return (
     <div className="p-6">
       
-      {/* --- ENCABEZADO --- */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Mapa del Salón / Mesas</h1>
@@ -182,7 +183,7 @@ export const TablesDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* --- ALERTA ERROR --- */}
+      {/* Alerta de Error */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex justify-between items-center">
           <span>⚠️ {error}</span>
@@ -195,7 +196,7 @@ export const TablesDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* --- GRILLA DE MESAS --- */}
+      {/* Grilla Visual de Mesas (Verde = Libre, Rojo = Ocupada, Amarillo = Esperando) */}
       {!error && tables.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-gray-200 shadow-xs max-w-lg mx-auto mt-8">
           <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold">
@@ -256,7 +257,7 @@ export const TablesDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* --- MODAL AGREGAR MESA --- */}
+      {/* Modal Agregar Mesa */}
       <CreateTableModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -264,7 +265,7 @@ export const TablesDashboard: React.FC = () => {
         suggestedTableNumber={tables.length + 1}
       />
 
-      {/* --- MODAL DETALLE / COMANDA MESA --- */}
+      {/* Modal / Panel Lateral de Mesa */}
       <TableModal
         table={selectedTable}
         isOpen={isTableModalOpen}

@@ -20,31 +20,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
   onConfirmPayment,
 }) => {
-  // --- ESTADOS ---
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [discountCode, setDiscountCode] = useState<string>('');
   const [codeApplied, setCodeApplied] = useState<boolean>(false);
   const [codeError, setCodeError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // --- VALIDACIÓN DE APERTURA ---
   if (!isOpen || !table || !table.currentOrder) return null;
 
   const items = table.currentOrder.items || [];
 
-  // --- CÁLCULOS DINÁMICOS ---
+  // Cálculos dinámicos
   const subtotal = items.reduce(
-    (acc: number, item) => {
-      const price = item.product?.price ?? item.unitPrice ?? 0;
-      return acc + price * item.quantity;
-    },
+    (acc, item) => acc + (item.product?.price ?? item.unitPrice ?? 0) * item.quantity,
     0
   );
 
   const discountAmount = (subtotal * discountPercent) / 100;
   const totalToPay = Math.max(0, subtotal - discountAmount);
 
-  // --- MANEJADORES DE EVENTOS ---
+  // Aplicar código promocional
   const handleApplyCode = () => {
     setCodeError('');
     const cleanCode = discountCode.trim().toUpperCase();
@@ -60,6 +55,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   };
 
+  // Confirmar pago y liberar la mesa en la base de datos
   const handleConfirm = async () => {
     if (!table.currentOrder?.id) {
       onConfirmPayment(table.id);
@@ -89,7 +85,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* --- HEADER --- */}
+        {/* Header */}
         <div className="px-6 py-4 bg-gray-900 text-white flex justify-between items-center">
           <div>
             <h3 className="text-lg font-bold">Cierre de Cuenta — Mesa #{table.tableNumber}</h3>
@@ -104,7 +100,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </button>
         </div>
 
-        {/* --- DETALLE DE CONSUMO --- */}
+        {/* Detalle del Consumo */}
         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="border-b border-gray-100 pb-3">
             <p className="text-xs font-bold text-gray-500 uppercase mb-2">Detalle del Consumo</p>
@@ -128,7 +124,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* --- SECCIÓN DE DESCUENTO --- */}
+          {/* Sección Descuento */}
           <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
             <label className="block text-xs font-bold text-gray-700">
               Aplicar Descuento
@@ -162,7 +158,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <button
                 type="button"
                 onClick={handleApplyCode}
-                className="px-3 py-1 bg-gray-800 text-white rounded text-xs font-semibold hover:bg-black transition-colors"
+                className="px-3 py-1 bg-gray-800 text-white rounded text-xs font-semibold hover:bg-black transition-colors cursor-pointer"
               >
                 Aplicar
               </button>
@@ -176,7 +172,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             )}
           </div>
 
-          {/* --- TOTALES --- */}
+          {/* Totales */}
           <div className="space-y-1.5 pt-2 text-xs border-t border-gray-100">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal:</span>
@@ -195,13 +191,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
         </div>
 
-        {/* --- ACCIONES --- */}
+        {/* Acciones */}
         <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 disabled:opacity-50"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 cursor-pointer disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -209,7 +205,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             type="button"
             onClick={handleConfirm}
             disabled={isSubmitting}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
+            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
           </button>
