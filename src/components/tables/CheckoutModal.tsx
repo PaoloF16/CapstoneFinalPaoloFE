@@ -1,9 +1,14 @@
 // src/components/tables/CheckoutModal.tsx
 import React, { useState } from 'react';
-import type { Table } from '../../types/restaurant';
+import { checkoutOrder } from '../../services/restaurantService';
+import type { RestaurantTable as Table, Order } from '../../types/restaurant';
+
+type ExtendedTable = Table & {
+  currentOrder?: Order;
+};
 
 interface CheckoutModalProps {
-  table: Table | null;
+  table: ExtendedTable | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirmPayment: (tableId: string) => void;
@@ -15,25 +20,31 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
   onConfirmPayment,
 }) => {
+  // --- ESTADOS ---
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [discountCode, setDiscountCode] = useState<string>('');
   const [codeApplied, setCodeApplied] = useState<boolean>(false);
   const [codeError, setCodeError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  // --- VALIDACIÓN DE APERTURA ---
   if (!isOpen || !table || !table.currentOrder) return null;
 
-  const items = table.currentOrder.items;
+  const items = table.currentOrder.items || [];
 
-  // Cálculos dinámicos
+  // --- CÁLCULOS DINÁMICOS ---
   const subtotal = items.reduce(
-    (acc, item) => acc + item.menuItem.price * item.quantity,
+    (acc: number, item) => {
+      const price = item.product?.price ?? item.unitPrice ?? 0;
+      return acc + price * item.quantity;
+    },
     0
   );
 
   const discountAmount = (subtotal * discountPercent) / 100;
   const totalToPay = Math.max(0, subtotal - discountAmount);
 
-  // Aplicar código de descuento manual (ej: PROMO10 o VIP20)
+  // --- MANEJADORES DE EVENTOS ---
   const handleApplyCode = () => {
     setCodeError('');
     const cleanCode = discountCode.trim().toUpperCase();
@@ -49,54 +60,80 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   };
 
-  const handleConfirm = () => {
-    onConfirmPayment(table.id);
-    onClose();
+  const handleConfirm = async () => {
+    if (!table.currentOrder?.id) {
+      onConfirmPayment(table.id);
+      onClose();
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      await checkoutOrder(table.currentOrder.id, {
+        discountValue: discountPercent,
+        discountType: 'PERCENTAGE',
+      });
+
+      onConfirmPayment(table.id);
+      onClose();
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      alert('Hubo un error al procesar el pago en el servidor.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Header */}
+        {/* --- HEADER --- */}
         <div className="px-6 py-4 bg-gray-900 text-white flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-bold">Cierre de Cuenta — Mesa {table.number}</h3>
+            <h3 className="text-lg font-bold">Cierre de Cuenta — Mesa #{table.tableNumber}</h3>
             <p className="text-xs text-gray-400">Resumen y procesamiento de pago</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white font-bold text-xl"
+            disabled={isSubmitting}
+            className="text-gray-400 hover:text-white font-bold text-xl cursor-pointer"
           >
             ✕
           </button>
         </div>
 
-        {/* Detalle de Ítems */}
+        {/* --- DETALLE DE CONSUMO --- */}
         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="border-b border-gray-100 pb-3">
             <p className="text-xs font-bold text-gray-500 uppercase mb-2">Detalle del Consumo</p>
             <div className="space-y-2">
-              {items.map((item) => (
-                <div key={item.menuItem.id} className="flex justify-between text-xs">
-                  <span className="text-gray-700">
-                    <strong className="font-semibold">{item.quantity}x</strong> {item.menuItem.name}
-                  </span>
-                  <span className="font-medium text-gray-900">
-                    S/ {(item.menuItem.price * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
+              {items.map((item, index) => {
+                const itemPrice = item.product?.price ?? item.unitPrice ?? 0;
+                const itemId = item.product?.id || item.id || `item-${index}`;
+                const itemName = item.product?.name || 'Producto';
+
+                return (
+                  <div key={itemId} className="flex justify-between text-xs">
+                    <span className="text-gray-700">
+                      <strong className="font-semibold">{item.quantity}x</strong> {itemName}
+                    </span>
+                    <span className="font-medium text-gray-900">
+                      S/ {(itemPrice * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Sección de Descuento */}
+          {/* --- SECCIÓN DE DESCUENTO --- */}
           <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
             <label className="block text-xs font-bold text-gray-700">
               Aplicar Descuento
             </label>
             
-            {/* Porcentaje manual */}
             <div className="flex gap-2 items-center">
               <span className="text-xs text-gray-500">% Descuento:</span>
               <input
@@ -114,7 +151,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <span className="text-xs text-gray-500">%</span>
             </div>
 
-            {/* Código promocional */}
             <div className="flex gap-2 pt-1">
               <input
                 type="text"
@@ -140,7 +176,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             )}
           </div>
 
-          {/* Totales */}
+          {/* --- TOTALES --- */}
           <div className="space-y-1.5 pt-2 text-xs border-t border-gray-100">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal:</span>
@@ -159,21 +195,23 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
         </div>
 
-        {/* Acciones */}
+        {/* --- ACCIONES --- */}
         <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100"
+            disabled={isSubmitting}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors"
+            disabled={isSubmitting}
+            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
           >
-            Confirmar Pago
+            {isSubmitting ? 'Procesando...' : 'Confirmar Pago'}
           </button>
         </div>
 

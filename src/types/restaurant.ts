@@ -1,29 +1,51 @@
 // src/types/restaurant.ts
 
 export type TableStatus = 'AVAILABLE' | 'OCCUPIED' | 'WAITING';
+export type OrderStatus = 'PENDING' | 'IN_PREPARATION' | 'DELIVERED' | 'PAID';
 
-export interface MenuItem {
+export interface RestaurantTable {
   id: string;
-  name: string;
-  price: number;
-  category: string;
-  image?: string;
+  tableNumber: number;
+  capacity: number;
+  status: TableStatus;
+  imageUrl?: string;
 }
 
 export interface OrderItem {
-  menuItem: MenuItem;
+  id?: string;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+  };
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface Order {
+  id: string;
+  table: RestaurantTable;
+  status: OrderStatus;
+  subtotal: number;
+  discount: number;
+  discountType?: 'PERCENTAGE' | 'FIXED' | 'NONE';
+  total: number;
+  items: OrderItem[];
+  createdAt: string;
+}
+
+// DTOs para peticiones
+export interface OrderItemRequest {
+  productId: string;
   quantity: number;
 }
 
-export interface Table {
-  id: string;
-  number: number;
-  capacity: number;
-  status: TableStatus;
-  image?: string; // <-- Nueva propiedad opcional para la foto de la mesa
-  currentOrder?: {
-    id: string;
-    items: OrderItem[];
-    createdAt: string;
-  };
+export interface CreateOrderDTO {
+  tableId: string;
+  items: OrderItemRequest[];
+}
+
+export interface CheckoutDTO {
+  discountValue?: number;
+  discountType?: 'PERCENTAGE' | 'FIXED';
 }

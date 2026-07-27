@@ -1,11 +1,15 @@
 // src/services/menuService.ts
-import { apiClient } from './api';
+
+// 1. Importación por defecto del cliente HTTP
+import api from './api';
+
+// 2. Importación exclusiva de tipos TypeScript
 import type { MenuItem, Category, MenuItemFormData } from '../types/menu';
 
 export const menuService = {
   getProducts: async (categoryId?: string): Promise<MenuItem[]> => {
     try {
-      const response = await apiClient.get<MenuItem[]>('/products', {
+      const response = await api.get<MenuItem[]>('/products', {
         params: { categoryId },
       });
       return response.data || [];
@@ -17,7 +21,7 @@ export const menuService = {
 
   getCategories: async (): Promise<Category[]> => {
     try {
-      const response = await apiClient.get<Category[]>('/categories');
+      const response = await api.get<Category[]>('/categories');
       return response.data || [];
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -26,21 +30,21 @@ export const menuService = {
   },
 
   createProduct: async (data: MenuItemFormData): Promise<MenuItem> => {
-    const response = await apiClient.post<MenuItem>('/products', data);
+    const response = await api.post<MenuItem>('/products', data);
     return response.data;
   },
 
   updateProduct: async (id: string, data: Partial<MenuItemFormData>): Promise<MenuItem> => {
-    const response = await apiClient.put<MenuItem>(`/products/${id}`, data);
+    const response = await api.put<MenuItem>(`/products/${id}`, data);
     return response.data;
   },
 
   deleteProduct: async (id: string): Promise<void> => {
-    await apiClient.delete(`/products/${id}`);
+    await api.delete(`/products/${id}`);
   },
 
   toggleAvailability: async (id: string, isAvailable: boolean): Promise<MenuItem> => {
-    const response = await apiClient.patch<MenuItem>(`/products/${id}/availability`, { isAvailable });
+    const response = await api.patch<MenuItem>(`/products/${id}/availability`, { isAvailable });
     return response.data;
   },
 };

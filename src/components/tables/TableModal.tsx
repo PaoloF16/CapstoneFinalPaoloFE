@@ -1,17 +1,28 @@
 // src/components/tables/TableModal.tsx
-import React, { useState } from 'react';
-import type { Table, MenuItem, OrderItem } from '../../types/restaurant';
+import React, { useState, useEffect } from 'react';
+import type { RestaurantTable as Table, OrderItem, Order } from '../../types/restaurant';
 import { CheckoutModal } from './CheckoutModal';
 
+interface MenuItem {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
+
+type ExtendedTable = Table & {
+  currentOrder?: Order;
+};
+
 interface TableModalProps {
-  table: Table | null;
+  table: ExtendedTable | null;
   isOpen: boolean;
   onClose: () => void;
   menuItems: MenuItem[];
   categories: string[];
   onOpenTable: (tableId: string) => void;
   onUpdateOrder: (tableId: string, items: OrderItem[]) => void;
-  onCloseTable: (tableId: string) => void; // Callback para liberar la mesa
+  onCloseTable: (tableId: string) => void;
 }
 
 export const TableModal: React.FC<TableModalProps> = ({
@@ -28,10 +39,17 @@ export const TableModal: React.FC<TableModalProps> = ({
 
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [currentItems, setCurrentItems] = useState<OrderItem[]>(
-    table.currentOrder?.items || []
-  );
+  const [currentItems, setCurrentItems] = useState<OrderItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+
+  // Sincronizar el estado de los ítems con el pedido activo de la mesa
+  useEffect(() => {
+    if (table?.currentOrder?.items) {
+      setCurrentItems(table.currentOrder.items);
+    } else {
+      setCurrentItems([]);
+    }
+  }, [table]);
 
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesCategory = selectedCategory === 'Todas' || item.category === selectedCategory;
@@ -41,21 +59,28 @@ export const TableModal: React.FC<TableModalProps> = ({
 
   const handleAddItem = (item: MenuItem) => {
     setCurrentItems((prev) => {
-      const existing = prev.find((i) => i.menuItem.id === item.id);
+      const existing = prev.find((i) => i.product.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i.menuItem.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.product.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prev, { menuItem: item, quantity: 1 }];
+      return [
+        ...prev,
+        {
+          product: { id: item.id, name: item.name, price: item.price },
+          quantity: 1,
+          unitPrice: item.price,
+        },
+      ];
     });
   };
 
-  const handleUpdateQuantity = (itemId: string, delta: number) => {
+  const handleUpdateQuantity = (productId: string, delta: number) => {
     setCurrentItems((prev) =>
       prev
         .map((i) => {
-          if (i.menuItem.id === itemId) {
+          if (i.product.id === productId) {
             const newQty = i.quantity + delta;
             return newQty > 0 ? { ...i, quantity: newQty } : null;
           }
@@ -76,7 +101,7 @@ export const TableModal: React.FC<TableModalProps> = ({
   };
 
   const totalAmount = currentItems.reduce(
-    (acc, item) => acc + item.menuItem.price * item.quantity,
+    (acc, item) => acc + (item.product.price || item.unitPrice || 0) * item.quantity,
     0
   );
 
@@ -88,7 +113,8 @@ export const TableModal: React.FC<TableModalProps> = ({
           {/* Header */}
           <div className="p-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
             <div>
-              <h2 className="text-xl font-bold text-gray-800">Mesa {table.number}</h2>
+              {/* Corregido: tableNumber en lugar de table.number */}
+              <h2 className="text-xl font-bold text-gray-800">Mesa #{table.tableNumber}</h2>
               <p className="text-sm text-gray-500">
                 Estado: <span className="font-semibold uppercase">{table.status}</span>
               </p>
@@ -132,20 +158,20 @@ export const TableModal: React.FC<TableModalProps> = ({
                     <div className="space-y-3">
                       {currentItems.map((item) => (
                         <div
-                          key={item.menuItem.id}
+                          key={item.product.id}
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
                         >
                           <div className="flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-800">
-                              {item.menuItem.name}
+                              {item.product.name}
                             </p>
                             <p className="text-xs text-gray-500">
-                              S/ {item.menuItem.price.toFixed(2)} c/u
+                              S/ {(item.product.price || item.unitPrice).toFixed(2)} c/u
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleUpdateQuantity(item.menuItem.id, -1)}
+                              onClick={() => handleUpdateQuantity(item.product.id, -1)}
                               className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100"
                             >
                               -
@@ -154,7 +180,7 @@ export const TableModal: React.FC<TableModalProps> = ({
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => handleUpdateQuantity(item.menuItem.id, 1)}
+                              onClick={() => handleUpdateQuantity(item.product.id, 1)}
                               className="w-7 h-7 bg-white border border-gray-300 text-gray-700 rounded-md flex items-center justify-center font-bold hover:bg-gray-100"
                             >
                               +
@@ -253,7 +279,21 @@ export const TableModal: React.FC<TableModalProps> = ({
 
       {/* Modal de Pago / Cierre */}
       <CheckoutModal
-        table={{ ...table, currentOrder: { ...table.currentOrder!, items: currentItems } }}
+        table={{
+          ...table,
+          currentOrder: table.currentOrder
+            ? { ...table.currentOrder, items: currentItems }
+            : {
+                id: '',
+                table: table,
+                status: 'PENDING',
+                subtotal: totalAmount,
+                discount: 0,
+                total: totalAmount,
+                items: currentItems,
+                createdAt: new Date().toISOString(),
+              },
+        }}
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
         onConfirmPayment={handleConfirmPayment}
