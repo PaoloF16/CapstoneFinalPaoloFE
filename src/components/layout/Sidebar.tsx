@@ -7,27 +7,22 @@ export const Sidebar: React.FC = () => {
     {
       title: 'Tu Restaurante',
       items: [
-        { label: 'Restaurants', path: '/restaurants' },
-        { label: 'Productos', path: '/menu' },
+        { label: 'Mesas / Salón', path: '/tables' },
+        { label: 'Productos / Menú', path: '/menu' },
         { label: 'Configuración', path: '/settings' },
-        { label: 'Operaciones', path: '/operations' },
-        { label: 'Toteat Shop', path: '/shop' },
       ],
     },
     {
       title: 'Gestión',
       items: [
         { label: 'Personas', path: '/users' },
-        { label: 'Integraciones', path: '/integrations' },
-        { label: 'Reportes', path: '/reports' },
-        { label: 'Stock Control', path: '/stock' },
       ],
     },
   ];
 
   return (
-    <aside className="w-60 bg-[#1e2026] text-gray-300 flex flex-col h-screen select-none border-r border-gray-800">
-      {/* App Brand Header */}
+    <aside className="w-60 bg-[#1e2026] text-gray-300 flex flex-col h-screen select-none border-r border-gray-800 shrink-0">
+      {/* Header Brand */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-gray-800">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-red-500 flex items-center justify-center font-bold text-white text-xs">
@@ -65,19 +60,6 @@ export const Sidebar: React.FC = () => {
             ))}
           </div>
         ))}
-      </div>
-
-      {/* Footer Settings / Help */}
-      <div className="p-3 border-t border-gray-800 text-[11px] text-gray-400 space-y-2">
-        <div className="flex items-center justify-between px-2 py-1 hover:bg-[#252830] rounded cursor-pointer">
-          <span className="flex items-center gap-2">
-            <span>🌐</span> Español
-          </span>
-          <span className="text-[9px]">▼</span>
-        </div>
-        <div className="flex items-center gap-2 px-2 py-1 hover:bg-[#252830] rounded cursor-pointer">
-          <span>❓</span> Ayuda & Soporte
-        </div>
       </div>
     </aside>
   );

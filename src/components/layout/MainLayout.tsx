@@ -1,22 +1,26 @@
 // src/components/layout/MainLayout.tsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-import { Navbar } from './Navbar';
+import Sidebar from './Sidebar';
+import Navbar from './Navbar';
 
 export const MainLayout: React.FC = () => {
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
+      {/* Sidebar Navigation */}
       <Sidebar />
 
-      {/* Main Content Area */}
+      {/* Main Container */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto p-6">
+        
+        {/* Dynamic Route Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-100">
           <Outlet />
         </main>
       </div>
     </div>
   );
 };
+
+export default MainLayout;

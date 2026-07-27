@@ -1,11 +1,9 @@
 // src/pages/TablesDashboard.tsx
-
 import React, { useState } from 'react';
 import type { Table, MenuItem, OrderItem } from '../types/restaurant';
 import { TableCard } from '../components/tables/TableCard';
 import { TableModal } from '../components/tables/TableModal';
 
-/* Datos Mock de Prueba */
 const MOCK_CATEGORIES = ['Entradas', 'Fondos', 'Bebidas', 'Postres'];
 
 const MOCK_MENU: MenuItem[] = [
@@ -61,32 +59,21 @@ export const TablesDashboard: React.FC = () => {
   };
 
   const handleOpenTable = (tableId: string) => {
+    const updatedOrder = {
+      id: `order-${Date.now()}`,
+      items: [],
+      createdAt: new Date().toISOString(),
+    };
+
     setTables((prev) =>
       prev.map((t) =>
-        t.id === tableId
-          ? {
-              ...t,
-              status: 'OCCUPIED',
-              currentOrder: {
-                id: `order-${Date.now()}`,
-                items: [],
-                createdAt: new Date().toISOString(),
-              },
-            }
-          : t
+        t.id === tableId ? { ...t, status: 'OCCUPIED', currentOrder: updatedOrder } : t
       )
     );
+
     setSelectedTable((prev) =>
       prev && prev.id === tableId
-        ? {
-            ...prev,
-            status: 'OCCUPIED',
-            currentOrder: {
-              id: `order-${Date.now()}`,
-              items: [],
-              createdAt: new Date().toISOString(),
-            },
-          }
+        ? { ...prev, status: 'OCCUPIED', currentOrder: updatedOrder }
         : prev
     );
   };
@@ -114,17 +101,29 @@ export const TablesDashboard: React.FC = () => {
     );
   };
 
+  // Liberar mesa al realizar el pago (Vuelve a Verde/AVAILABLE)
+  const handleCloseTable = (tableId: string) => {
+    setTables((prev) =>
+      prev.map((t) =>
+        t.id === tableId
+          ? {
+              ...t,
+              status: 'AVAILABLE',
+              currentOrder: undefined,
+            }
+          : t
+      )
+    );
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      
-      {/* Dynamic Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard de Mesas</h1>
           <p className="text-sm text-gray-500">Gestión de estados y toma de pedidos en tiempo real</p>
         </div>
 
-        {/* Status Legend */}
         <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-xs">
           <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
             <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
@@ -141,14 +140,12 @@ export const TablesDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {tables.map((table) => (
           <TableCard key={table.id} table={table} onClick={handleTableClick} />
         ))}
       </div>
 
-      {/* Side Panel / Modal */}
       <TableModal
         table={selectedTable}
         isOpen={isModalOpen}
@@ -157,6 +154,7 @@ export const TablesDashboard: React.FC = () => {
         categories={MOCK_CATEGORIES}
         onOpenTable={handleOpenTable}
         onUpdateOrder={handleUpdateOrder}
+        onCloseTable={handleCloseTable}
       />
     </div>
   );
