@@ -1,11 +1,13 @@
 // src/components/tables/CreateTableModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import type { RestaurantTable } from '../../types/restaurant';
 
 interface CreateTableModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (tableNumber: number, capacity: number) => Promise<void>;
   suggestedTableNumber: number;
+  initialData?: RestaurantTable | null;
 }
 
 export const CreateTableModal: React.FC<CreateTableModalProps> = ({
@@ -13,13 +15,27 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   onClose,
   onSubmit,
   suggestedTableNumber,
+  initialData,
 }) => {
+  // --- ESTADOS LOCALES ---
   const [tableNumber, setTableNumber] = useState<number>(suggestedTableNumber);
   const [capacity, setCapacity] = useState<number>(4);
   const [loading, setLoading] = useState<boolean>(false);
 
+  // --- RELLENAR DATOS EN MODO EDICIÓN ---
+  useEffect(() => {
+    if (initialData) {
+      setTableNumber(initialData.tableNumber);
+      setCapacity(initialData.capacity);
+    } else {
+      setTableNumber(suggestedTableNumber);
+      setCapacity(4);
+    }
+  }, [initialData, suggestedTableNumber, isOpen]);
+
   if (!isOpen) return null;
 
+  // --- MANEJADOR DE ENVÍO ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -27,7 +43,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
       await onSubmit(tableNumber, capacity);
       onClose();
     } catch (err) {
-      console.error('Error al crear mesa:', err);
+      console.error('Error al guardar la mesa:', err);
     } finally {
       setLoading(false);
     }
@@ -35,11 +51,13 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 border border-gray-100">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Header */}
+        {/* --- HEADER --- */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-800">Agregar Nueva Mesa</h3>
+          <h3 className="text-lg font-bold text-gray-800">
+            {initialData ? 'Editar Mesa' : 'Agregar Nueva Mesa'}
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer"
@@ -48,7 +66,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
           </button>
         </div>
 
-        {/* Formulario */}
+        {/* --- FORMULARIO --- */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1 uppercase">
@@ -79,7 +97,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
             />
           </div>
 
-          {/* Acciones */}
+          {/* --- ACCIONES --- */}
           <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
             <button
               type="button"
@@ -93,7 +111,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
               disabled={loading}
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : 'Crear Mesa'}
+              {loading ? 'Guardando...' : initialData ? 'Actualizar Mesa' : 'Crear Mesa'}
             </button>
           </div>
         </form>

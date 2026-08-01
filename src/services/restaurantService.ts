@@ -1,9 +1,5 @@
 // src/services/restaurantService.ts
-
-// 1. Cliente HTTP Axios
 import api from './api';
-
-// 2. Tipos de datos de TypeScript
 import type { 
   RestaurantTable, 
   Order, 
@@ -17,7 +13,7 @@ import type {
 
 export const getTables = async (): Promise<RestaurantTable[]> => {
   const response = await api.get<RestaurantTable[]>('/tables');
-  return response.data;
+  return response.data || [];
 };
 
 export const createTable = async (tableData: Partial<RestaurantTable>): Promise<RestaurantTable> => {
@@ -25,9 +21,18 @@ export const createTable = async (tableData: Partial<RestaurantTable>): Promise<
   return response.data;
 };
 
+export const updateTable = async (tableId: string, tableData: Partial<RestaurantTable>): Promise<RestaurantTable> => {
+  const response = await api.put<RestaurantTable>(`/tables/${tableId}`, tableData);
+  return response.data;
+};
+
 export const updateTableStatus = async (tableId: string, status: TableStatus): Promise<RestaurantTable> => {
   const response = await api.put<RestaurantTable>(`/tables/${tableId}/status`, { status });
   return response.data;
+};
+
+export const deleteTable = async (tableId: string): Promise<void> => {
+  await api.delete(`/tables/${tableId}`);
 };
 
 // --- SERVICIOS DE PEDIDOS Y CHECKOUT ---

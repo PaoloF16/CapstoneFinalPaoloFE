@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import {
   getTables,
   createTable,
+  updateTable,
+  deleteTable,
   createOrder,
   getActiveOrderByTable,
   updateOrderItems,
@@ -24,13 +26,15 @@ interface LocalMenuItem {
 }
 
 export const TablesDashboard: React.FC = () => {
-  // Estados locales
+  // --- ESTADOS LOCALES ---
   const [tables, setTables] = useState<RestaurantTable[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Modales
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [editingTable, setEditingTable] = useState<RestaurantTable | null>(null);
+
   const [selectedTable, setSelectedTable] = useState<ExtendedTable | null>(null);
   const [isTableModalOpen, setIsTableModalOpen] = useState<boolean>(false);
 
@@ -38,7 +42,7 @@ export const TablesDashboard: React.FC = () => {
   const [menuItems, setMenuItems] = useState<LocalMenuItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Cargar mesas
+  // --- CARGA DE MESAS Y MENÚ ---
   const fetchTables = async () => {
     try {
       setLoading(true);
@@ -53,7 +57,6 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
-  // Cargar menú
   const fetchMenuData = async () => {
     try {
       const [products, cats] = await Promise.all([
@@ -80,7 +83,51 @@ export const TablesDashboard: React.FC = () => {
     fetchMenuData();
   }, []);
 
-  // Clic en mesa
+  // --- MANEJADORES DE ACCIONES DE MESA ---
+  const handleOpenCreateModal = () => {
+    setEditingTable(null);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleOpenEditModal = (e: React.MouseEvent, table: RestaurantTable) => {
+    e.stopPropagation();
+    setEditingTable(table);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleDeleteTable = async (e: React.MouseEvent, table: RestaurantTable) => {
+    e.stopPropagation();
+    if (table.status !== 'AVAILABLE') {
+      alert('No se puede eliminar una mesa ocupada o en espera.');
+      return;
+    }
+
+    if (confirm(`¿Seguro que deseas eliminar la Mesa #${table.tableNumber}?`)) {
+      try {
+        await deleteTable(table.id);
+        await fetchTables();
+      } catch (err) {
+        console.error('Error al eliminar mesa:', err);
+        alert('Error al eliminar la mesa.');
+      }
+    }
+  };
+
+  // --- SUBMIT CREAR / EDITAR MESA ---
+  const handleSaveTableSubmit = async (tableNumber: number, capacity: number) => {
+    if (editingTable) {
+      await updateTable(editingTable.id, { tableNumber, capacity });
+    } else {
+      await createTable({
+        tableNumber,
+        capacity,
+        status: 'AVAILABLE',
+      } as RestaurantTable);
+    }
+    await fetchTables();
+  };
+
+  // --- CLIC EN MESA PARA VER COMANDA ---
   const handleSelectTable = async (table: RestaurantTable) => {
     let order: Order | undefined = undefined;
 
@@ -96,17 +143,7 @@ export const TablesDashboard: React.FC = () => {
     setIsTableModalOpen(true);
   };
 
-  // Submit Crear Mesa
-  const handleCreateTableSubmit = async (tableNumber: number, capacity: number) => {
-    await createTable({
-      tableNumber,
-      capacity,
-      status: 'AVAILABLE',
-    } as RestaurantTable);
-    await fetchTables();
-  };
-
-  // Abrir Mesa
+  // --- ACCIONES EN COMANDA ---
   const handleOpenTable = async (tableId: string) => {
     try {
       const newOrder = await createOrder({ tableId, items: [] });
@@ -125,7 +162,6 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
-  // Actualizar Pedido
   const handleUpdateOrder = async (tableId: string, items: OrderItem[]) => {
     try {
       const itemRequests = items.map((i) => ({
@@ -151,7 +187,6 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
-  // Liberar / Cerrar Mesa tras el pago
   const handleCloseTable = async (_tableId: string) => {
     setIsTableModalOpen(false);
     setSelectedTable(null);
@@ -169,21 +204,21 @@ export const TablesDashboard: React.FC = () => {
   return (
     <div className="p-6">
       
-      {/* Header */}
+      {/* --- ENCABEZADO --- */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Mapa del Salón / Mesas</h1>
           <p className="text-sm text-gray-500">Gestión de comandas y mesas en tiempo real</p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={handleOpenCreateModal}
           className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-2"
         >
           + Agregar Mesa
         </button>
       </div>
 
-      {/* Alerta de Error */}
+      {/* --- ALERTA ERROR --- */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex justify-between items-center">
           <span>⚠️ {error}</span>
@@ -196,7 +231,7 @@ export const TablesDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Grilla Visual de Mesas (Verde = Libre, Rojo = Ocupada, Amarillo = Esperando) */}
+      {/* --- GRILLA DE MESAS --- */}
       {!error && tables.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-gray-200 shadow-xs max-w-lg mx-auto mt-8">
           <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold">
@@ -207,7 +242,7 @@ export const TablesDashboard: React.FC = () => {
             Agrega la primera mesa para comenzar a tomar pedidos.
           </p>
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={handleOpenCreateModal}
             className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors cursor-pointer"
           >
             + Crear Mesa #1
@@ -219,7 +254,7 @@ export const TablesDashboard: React.FC = () => {
             <div
               key={table.id}
               onClick={() => handleSelectTable(table)}
-              className={`p-5 rounded-2xl border transition-all shadow-xs hover:shadow-md cursor-pointer ${
+              className={`p-5 rounded-2xl border transition-all shadow-xs hover:shadow-md cursor-pointer flex flex-col justify-between ${
                 table.status === 'AVAILABLE'
                   ? 'bg-emerald-50/60 border-emerald-200 hover:border-emerald-500'
                   : table.status === 'OCCUPIED'
@@ -227,45 +262,74 @@ export const TablesDashboard: React.FC = () => {
                   : 'bg-amber-50/60 border-amber-200 hover:border-amber-500'
               }`}
             >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-bold text-gray-800">
-                  Mesa #{table.tableNumber}
-                </h3>
-                <span
-                  className={`px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full ${
-                    table.status === 'AVAILABLE'
-                      ? 'bg-emerald-100 text-emerald-800'
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Mesa #{table.tableNumber}
+                  </h3>
+                  <span
+                    className={`px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full ${
+                      table.status === 'AVAILABLE'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : table.status === 'OCCUPIED'
+                        ? 'bg-rose-100 text-rose-800'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
+                    {table.status === 'AVAILABLE'
+                      ? 'Libre'
                       : table.status === 'OCCUPIED'
-                      ? 'bg-rose-100 text-rose-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}
-                >
-                  {table.status === 'AVAILABLE'
-                    ? 'Libre'
-                    : table.status === 'OCCUPIED'
-                    ? 'Ocupada'
-                    : 'Esperando'}
-                </span>
+                      ? 'Ocupada'
+                      : 'Esperando'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-500 mb-3">
+                  Capacidad: <strong className="text-gray-700">{table.capacity} personas</strong>
+                </p>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Capacidad: <strong className="text-gray-700">{table.capacity} personas</strong></span>
-                <span className="text-emerald-700 font-bold hover:underline">Ver comanda →</span>
+              {/* --- BOTONES EDITAR Y ELIMINAR --- */}
+              <div className="pt-3 border-t border-gray-200/80 flex items-center justify-between gap-2">
+                <span className="text-emerald-700 font-bold hover:underline text-xs">
+                  Ver comanda →
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => handleOpenEditModal(e, table)}
+                    className="px-2 py-1 bg-white border border-blue-300 text-blue-600 hover:bg-blue-50 rounded-md text-[11px] font-bold shadow-xs cursor-pointer transition-colors"
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteTable(e, table)}
+                    className="px-2 py-1 bg-white border border-red-300 text-red-600 hover:bg-red-50 rounded-md text-[11px] font-bold shadow-xs cursor-pointer transition-colors"
+                  >
+                    🗑️ Borrar
+                  </button>
+                </div>
               </div>
+
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal Agregar Mesa */}
+      {/* --- MODAL CREAR / EDITAR MESA --- */}
       <CreateTableModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateTableSubmit}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setEditingTable(null);
+        }}
+        onSubmit={handleSaveTableSubmit}
         suggestedTableNumber={tables.length + 1}
+        initialData={editingTable}
       />
 
-      {/* Modal / Panel Lateral de Mesa */}
+      {/* --- MODAL DETALLE / COMANDA MESA --- */}
       <TableModal
         table={selectedTable}
         isOpen={isTableModalOpen}

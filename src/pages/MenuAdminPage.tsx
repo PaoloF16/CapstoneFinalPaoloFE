@@ -45,11 +45,16 @@ export const MenuAdminPage: React.FC = () => {
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (confirm('¿Seguro que deseas eliminar esta categoría?')) {
+  if (confirm('¿Seguro que deseas eliminar esta categoría?')) {
+    try {
       await menuService.deleteCategory(id);
       await fetchData();
+    } catch (error) {
+      console.error("Error al eliminar categoría:", error);
+      alert("No se pudo eliminar la categoría. Revisa la consola o la configuración del servidor.");
     }
-  };
+  }
+};
 
   // --- MANEJADORES DE PRODUCTOS ---
   const handleCreateOrUpdateProduct = async (formData: MenuItemFormData) => {
