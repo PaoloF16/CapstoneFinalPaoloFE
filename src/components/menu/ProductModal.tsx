@@ -31,6 +31,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -65,18 +66,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await onSubmit(formData);
-      onClose();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setError(null);
 
+  if (!formData.categoryId) {
+    setError('Por favor selecciona una categoría válida.');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await onSubmit(formData); // Llama a menuService.createProduct
+    onClose(); // Cierra el modal únicamente al guardarse exitosamente
+  } catch (err: any) {
+    console.error('Error al guardar plato:', err);
+    const serverMessage =
+      err.response?.data?.message ||
+      err.response?.data ||
+      'Error de validación (400 Bad Request) al guardar en el servidor.';
+    setError(typeof serverMessage === 'string' ? serverMessage : 'Error al guardar plato.');
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-100">
@@ -261,3 +273,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 };
 
 export default ProductModal;
+
+function setError(arg0: null) {
+  throw new Error('Function not implemented.');
+}

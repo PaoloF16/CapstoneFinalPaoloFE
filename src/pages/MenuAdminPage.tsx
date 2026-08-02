@@ -19,20 +19,23 @@ export const MenuAdminPage: React.FC = () => {
 
   // --- CARGA DE DATOS ---
   const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [productsData, categoriesData] = await Promise.all([
-        menuService.getProducts(),
-        menuService.getCategories(),
-      ]);
-      setProducts(productsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Error al cargar datos del menú:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const [productsData, categoriesData] = await Promise.all([
+      menuService.getProducts(),
+      menuService.getCategories(),
+    ]);
+
+    setProducts(Array.isArray(productsData) ? productsData : []);
+    // 💡 Asegura que categories sea un array aunque la API falle o traiga formato inválido
+    setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+  } catch (error) {
+    console.error('Error al cargar datos del menú:', error);
+    setCategories([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchData();
@@ -79,9 +82,12 @@ export const MenuAdminPage: React.FC = () => {
   };
 
   // --- FILTRADO DE PRODUCTOS ---
-  const filteredProducts = selectedCategoryId === 'ALL'
-    ? products
-    : products.filter((p) => p.categoryId === selectedCategoryId || p.category?.id === selectedCategoryId);
+ const filteredProducts = selectedCategoryId === 'ALL'
+  ? products
+  : products.filter((p) => {
+      const catId = p.categoryId || p.category?.id;
+      return catId === selectedCategoryId;
+    });
 
   return (
     <div className="p-6">

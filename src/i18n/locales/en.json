@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "yourRestaurant": "Your Restaurant",
+    "tables": "Tables / Floor",
+    "menu": "Products / Menu",
+    "settings": "Settings",
+    "management": "Management",
+    "users": "Staff & Users",
+    "logout": "Log Out"
+  },
+  "common": {
+    "search": "Search...",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "save": "Save",
+    "cancel": "Cancel",
+    "active": "ACTIVE",
+    "inactive": "INACTIVE"
+  },
+  "users": {
+    "title": "People and Staff Management",
+    "subtitle": "Manage users, roles, and quick access PIN for POS.",
+    "newRole": "+ New Role",
+    "newUser": "+ New User",
+    "editUser": "Edit User",
+    "createUser": "Create New User",
+    "createRole": "Create New Role",
+    "name": "Name",
+    "email": "Email Address",
+    "role": "Role / Permission",
+    "pin": "POS PIN (4 digits)",
+    "status": "Status",
+    "actions": "Actions",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "noRole": "No Role",
+    "selectRole": "-- Select Role --",
+    "roleName": "Role Name",
+    "roleDescription": "Description (Optional)"
+  },
+  "settings": {
+    "title": "System Settings",
+    "subtitle": "Customize application preferences and language.",
+    "language": "Application Language",
+    "selectLanguage": "Select a language",
+    "spanish": "Spanish",
+    "english": "English",
+    "italian": "Italian"
+  },
+  "tables": {
+    "title": "Floor & Tables",
+    "subtitle": "Visual table status management and order taking.",
+    "available": "AVAILABLE",
+    "occupied": "OCCUPIED",
+    "waiting": "WAITING"
+  },
+  "menu": {
+    "title": "Menu & Products Management",
+    "subtitle": "Manage categories, prices, and availability.",
+    "newProduct": "+ New Product",
+    "newCategory": "+ New Category"
+  }
+}

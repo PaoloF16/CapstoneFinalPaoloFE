@@ -1,6 +1,27 @@
 // src/components/tables/TableCard.tsx
 import React from 'react';
-import type { Table, TableStatus } from '../../types/restaurant';
+import type { TableStatus } from '../../types/restaurant';
+
+interface MenuItem {
+  price: number;
+}
+
+interface OrderItem {
+  quantity: number;
+  menuItem: MenuItem;
+}
+
+interface CurrentOrder {
+  items: OrderItem[];
+}
+
+interface Table {
+  number: number;
+  status: TableStatus;
+  capacity: number;
+  image?: string;
+  currentOrder?: CurrentOrder;
+}
 
 interface TableCardProps {
   table: Table;
@@ -29,9 +50,12 @@ const statusConfig: Record<TableStatus, { bg: string; text: string; label: strin
 };
 
 export const TableCard: React.FC<TableCardProps> = ({ table, onClick }) => {
-  const config = statusConfig[table.status];
-  const totalItems = table.currentOrder?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
-  const totalAmount = table.currentOrder?.items.reduce((acc, item) => acc + item.menuItem.price * item.quantity, 0) || 0;
+  const config = statusConfig[table.status as TableStatus];
+  const totalItems = table.currentOrder?.items.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0) || 0;
+  const totalAmount = table.currentOrder?.items.reduce(
+    (acc: number, item: { quantity: number; menuItem: { price: number } }) => acc + item.menuItem.price * item.quantity,
+    0
+  ) || 0;
 
   return (
     <div

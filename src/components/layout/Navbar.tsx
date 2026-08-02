@@ -1,10 +1,12 @@
 // src/components/layout/Navbar.tsx
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Navbar: React.FC = () => {
+  const { t, language, changeLanguage } = useLanguage();
+
   return (
-    <header className="h-14 bg-[#212328] border-b border-gray-800 flex items-center justify-between px-6 text-white">
-      {/* Left Title / Location */}
+    <header className="h-14 bg-[#212328] border-b border-gray-800 flex items-center justify-between px-6 text-white w-full shrink-0">
       <div className="flex items-center gap-4">
         <span className="font-bold text-sm tracking-wide flex items-center gap-2">
           <span className="text-red-500">toteat</span>
@@ -16,17 +18,46 @@ export const Navbar: React.FC = () => {
         </span>
       </div>
 
-      {/* Search / Top Actions */}
       <div className="flex items-center gap-4 text-xs">
         <div className="relative">
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder={t('common.search', 'Buscar...')}
             className="bg-[#18191c] border border-gray-700 rounded-md px-3 py-1 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-red-500 w-48"
           />
         </div>
 
-        {/* User Badge */}
+        {/* Botones de Idioma */}
+        <div className="flex items-center gap-1 bg-[#18191c] border border-gray-700 rounded-md p-1">
+          <button
+            type="button"
+            onClick={() => changeLanguage('es')}
+            className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
+              language === 'es' ? 'bg-red-500 text-white shadow-sm' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            🇪🇸 ES
+          </button>
+          <button
+            type="button"
+            onClick={() => changeLanguage('en')}
+            className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
+              language === 'en' ? 'bg-red-500 text-white shadow-sm' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            🇬🇧 EN
+          </button>
+          <button
+            type="button"
+            onClick={() => changeLanguage('it')}
+            className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
+              language === 'it' ? 'bg-red-500 text-white shadow-sm' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            🇮🇹 IT
+          </button>
+        </div>
+
         <div className="flex items-center gap-2 border-l border-gray-700 pl-4">
           <div className="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center font-bold text-xs">
             M

@@ -1,30 +1,31 @@
 // src/components/layout/Sidebar.tsx
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const navSections = [
     {
-      title: 'Tu Restaurante',
+      title: t('nav.yourRestaurant', 'Tu Restaurante'),
       items: [
-        { label: 'Mesas / Salón', path: '/tables', icon: '🪑' },
-        { label: 'Productos / Menú', path: '/menu', icon: '🍔' },
-        { label: 'Configuración', path: '/settings', icon: '⚙️' },
+        { label: t('nav.tables', 'Mesas / Salón'), path: '/tables', icon: '🪑' },
+        { label: t('nav.menu', 'Productos / Menú'), path: '/menu', icon: '🍔' },
+        { label: t('nav.settings', 'Configuración'), path: '/settings', icon: '⚙️' },
       ],
     },
     {
-      title: 'Gestión',
+      title: t('nav.management', 'Gestión'),
       items: [
-        { label: 'Personas', path: '/users', icon: '👥' },
+        { label: t('nav.users', 'Personas'), path: '/users', icon: '👥' },
       ],
     },
   ];
 
   const handleLogout = () => {
-    // Aquí puedes limpiar tokens de sesión si los usas
     localStorage.removeItem('token');
     navigate('/login');
   };
@@ -35,7 +36,6 @@ export const Sidebar: React.FC = () => {
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
-      {/* Header Brand + Toggle Button */}
       <div className="h-14 flex items-center justify-between px-3 border-b border-gray-800">
         <div className="flex items-center gap-2 overflow-hidden">
           <div className="w-7 h-7 rounded bg-red-500 flex items-center justify-center font-bold text-white text-xs shrink-0">
@@ -48,17 +48,15 @@ export const Sidebar: React.FC = () => {
           )}
         </div>
 
-        {/* Botón para Achicar / Agrandar Sidebar */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
-          title={isCollapsed ? 'Agrandar' : 'Achicar'}
+          title={isCollapsed ? t('common.expand', 'Agrandar') : t('common.collapse', 'Achicar')}
         >
           {isCollapsed ? '➔' : '⬅'}
         </button>
       </div>
 
-      {/* Navigation Tree */}
       <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6 text-xs">
         {navSections.map((section, idx) => (
           <div key={idx} className="space-y-1">
@@ -88,17 +86,16 @@ export const Sidebar: React.FC = () => {
         ))}
       </div>
 
-      {/* Footer / Logout */}
       <div className="p-2 border-t border-gray-800 text-xs">
         <button
           onClick={handleLogout}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-red-400 hover:bg-red-500/10 hover:text-red-300 font-semibold transition-colors ${
             isCollapsed ? 'justify-center px-0' : ''
           }`}
-          title="Cerrar Sesión"
+          title={t('nav.logout', 'Cerrar Sesión')}
         >
           <span className="text-sm">🚪</span>
-          {!isCollapsed && <span>Cerrar Sesión</span>}
+          {!isCollapsed && <span>{t('nav.logout', 'Cerrar Sesión')}</span>}
         </button>
       </div>
     </aside>

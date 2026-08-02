@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "yourRestaurant": "Tu Restaurante",
+    "tables": "Mesas / Salón",
+    "menu": "Productos / Menú",
+    "settings": "Configuración",
+    "management": "Gestión",
+    "users": "Personas",
+    "logout": "Cerrar Sesión"
+  },
+  "common": {
+    "search": "Buscar...",
+    "expand": "Agrandar",
+    "collapse": "Achicar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "active": "ACTIVO",
+    "inactive": "INACTIVO"
+  },
+  "users": {
+    "title": "Gestión de Personas y Personal",
+    "subtitle": "Administra usuarios, roles y PIN de acceso rápido al POS.",
+    "newRole": "+ Nuevo Rol",
+    "newUser": "+ Nuevo Usuario",
+    "editUser": "Editar Usuario",
+    "createUser": "Crear Nuevo Usuario",
+    "createRole": "Crear Nuevo Rol",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "role": "Rol / Permiso",
+    "pin": "PIN POS (4 dígitos)",
+    "status": "Estado",
+    "actions": "Acciones",
+    "edit": "Editar",
+    "deactivate": "Desactivar",
+    "activate": "Activar",
+    "noRole": "Sin Rol",
+    "selectRole": "-- Seleccionar Rol --",
+    "roleName": "Nombre del Rol",
+    "roleDescription": "Descripción (Opcional)"
+  },
+  "settings": {
+    "title": "Configuración del Sistema",
+    "subtitle": "Personaliza las preferencias de la aplicación y el idioma.",
+    "language": "Idioma de la Aplicación",
+    "selectLanguage": "Selecciona un idioma",
+    "spanish": "Español",
+    "english": "Inglés",
+    "italian": "Italiano"
+  },
+  "tables": {
+    "title": "Salón y Mesas",
+    "subtitle": "Gestión visual del estado de mesas y toma de comandas.",
+    "available": "DISPONIBLE",
+    "occupied": "OCUPADA",
+    "waiting": "EN ESPERA"
+  },
+  "menu": {
+    "title": "Gestión de Carta y Productos",
+    "subtitle": "Administra categorías, precios y disponibilidad.",
+    "newProduct": "+ Nuevo Producto",
+    "newCategory": "+ Nueva Categoría"
+  }
+}
