@@ -56,3 +56,8 @@ export const checkoutOrder = async (orderId: string, checkoutData: CheckoutDTO):
   const response = await api.post<Order>(`/orders/${orderId}/checkout`, checkoutData);
   return response.data;
 };
+// Agregar en src/services/restaurantService.ts si deseas actualizar estado directo:
+export const sendOrderToKitchen = async (orderId: string): Promise<Order> => {
+  const response = await api.put<Order>(`/orders/${orderId}/items`);
+  return response.data;
+};

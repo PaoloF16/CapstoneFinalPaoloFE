@@ -1,7 +1,4 @@
-// ==========================================
-// SERVICIO API - USUARIOS Y ROLES
-// ==========================================
-
+// src/services/userService.ts
 import api from './api';
 import type { User, Role, UserFormData, RoleFormData } from '../types/user';
 
@@ -15,6 +12,15 @@ export const userService = {
   createRole: async (data: RoleFormData): Promise<Role> => {
     const response = await api.post<Role>('/roles', data);
     return response.data;
+  },
+
+  updateRole: async (id: string, data: Partial<RoleFormData>): Promise<Role> => {
+    const response = await api.put<Role>(`/roles/${id}`, data);
+    return response.data;
+  },
+
+  deleteRole: async (id: string): Promise<void> => {
+    await api.delete(`/roles/${id}`);
   },
 
   // USUARIOS

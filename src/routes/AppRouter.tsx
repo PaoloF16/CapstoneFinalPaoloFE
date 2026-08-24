@@ -1,13 +1,16 @@
 // src/routes/AppRouter.tsx
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { MainLayout } from '../components/layout/MainLayout';
-import { TablesDashboard } from '../pages/TablesDashboard';
-import { MenuAdminPage } from '../pages/MenuAdminPage';
-import { LoginPage } from '../pages/LoginPage';
-import { RegisterPage } from '../pages/RegisterPage';
-import { UsersPage } from '../pages/UsersPage';
-import { SettingsPage } from '../pages/SettingsPage';
+import React from "react"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { MainLayout } from "../components/layout/MainLayout"
+import { TablesDashboard } from "../pages/TablesDashboard"
+import { MenuAdminPage } from "../pages/MenuAdminPage"
+import { LoginPage } from "../pages/LoginPage"
+import { RegisterPage } from "../pages/RegisterPage"
+import { UsersPage } from "../pages/UsersPage"
+import { SettingsPage } from "../pages/SettingsPage"
+import { MobileLoginPage } from "../pages/mobile/MobileLoginPage"
+import { MobileTablesPage } from "../pages/mobile/MobileTablesPage"
+import { MobileOrderPage } from "../pages/mobile/MobileOrderPage"
 
 export const AppRouter: React.FC = () => {
   return (
@@ -26,7 +29,10 @@ export const AppRouter: React.FC = () => {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
+        <Route path="/mobile/login" element={<MobileLoginPage />} />
+        <Route path="/mobile/tables" element={<MobileTablesPage />} />
+        <Route path="/mobile/order/:tableId" element={<MobileOrderPage />} />
       </Routes>
     </BrowserRouter>
-  );
-};
+  )
+}

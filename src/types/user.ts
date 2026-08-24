@@ -1,11 +1,10 @@
-// ==========================================
-// TIPOS E INTERFACES PARA USUARIOS Y ROLES
-// ==========================================
+// src/types/user.ts
 
 export interface Role {
   id: string;
   name: string;
   description?: string;
+  permissions?: string[];
 }
 
 export interface User {
@@ -27,4 +26,5 @@ export interface UserFormData {
 export interface RoleFormData {
   name: string;
   description?: string;
+  permissions: string[];
 }
