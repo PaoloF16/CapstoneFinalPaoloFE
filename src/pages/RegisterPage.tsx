@@ -1,98 +1,121 @@
 // src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useRestaurant } from '../context/RestaurantContext';
+import axios from 'axios';
 
 export const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { settings } = useRestaurant();
+
   const [formData, setFormData] = useState({
-    restaurantName: '',
-    fullName: '',
+    name: '',
     email: '',
     password: '',
+    role: 'ADMIN',
   });
 
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulación de registro exitoso
-    localStorage.setItem('token', 'fake-jwt-token');
-    navigate('/tables');
+    setError(null);
+    setLoading(true);
+
+    try {
+      await axios.post('http://localhost:8080/api/auth/register', formData);
+      alert('¡Cuenta creada con éxito! Inicia sesión con tus credenciales.');
+      navigate('/login');
+    } catch (err: any) {
+      console.error('Error al registrar usuario:', err);
+      setError(
+        err.response?.data?.message ||
+        err.response?.data ||
+        'Error al crear la cuenta. Intente con otro correo.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#18191c] flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center font-bold text-white text-2xl mx-auto mb-3">
-            t
+    <div className="min-h-screen bg-[#0d0f12] flex items-center justify-center p-4">
+      <div className="bg-[#181b22] border border-gray-800 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
+        
+        <div className="text-center space-y-2">
+          <div className="w-14 h-14 rounded-2xl bg-red-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-lg shadow-red-600/30">
+            {settings.logoInitial}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
-          <p className="text-xs text-gray-500 mt-1">Registra tu restaurante en la plataforma</p>
+          <h2 className="text-2xl font-black text-white">Crear Cuenta</h2>
+          <p className="text-xs text-gray-400">Regístrate para administrar {settings.name}</p>
         </div>
+
+        {error && (
+          <div className="p-3 bg-red-950/50 border border-red-800 text-red-400 text-xs font-bold rounded-xl text-center">
+            ⚠️ {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Nombre del Restaurante</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+              Nombre Completo
+            </label>
             <input
               type="text"
               required
-              value={formData.restaurantName}
-              onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
-              placeholder="Ej. Mi Restaurante"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Ej. Paolo Flores"
+              className="w-full bg-[#101216] border border-gray-700 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Nombre Completo</label>
-            <input
-              type="text"
-              required
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              placeholder="Juan Pérez"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+              Correo Electrónico
+            </label>
             <input
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="juan@ejemplo.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+              placeholder="usuario@ejemplo.com"
+              className="w-full bg-[#101216] border border-gray-700 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Contraseña</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+              Contraseña
+            </label>
             <input
               type="password"
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="••••••••"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+              className="w-full bg-[#101216] border border-gray-700 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm shadow-sm transition-colors mt-2"
+            disabled={loading}
+            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer disabled:opacity-50"
           >
-            Registrarme
+            {loading ? 'Creando cuenta...' : 'Completar Registro'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-600 mt-6">
+        <div className="text-center pt-2 border-t border-gray-800 text-xs text-gray-400">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-red-500 font-bold hover:underline">
-            Inicia sesión
+          <Link to="/login" className="text-red-400 font-bold hover:underline">
+            Iniciar Sesión
           </Link>
-        </p>
+        </div>
+
       </div>
     </div>
   );

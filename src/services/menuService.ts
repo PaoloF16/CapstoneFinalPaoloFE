@@ -35,13 +35,20 @@ export const menuService = {
     return response.data;
   },
 
+
+
   updateProduct: async (id: string, data: Partial<MenuItemFormData>): Promise<MenuItem> => {
     const payload = {
-      ...data,
-      ...(data.price ? { price: Number(data.price) } : {}),
-      ...(data.categoryId
-        ? { categoryId: data.categoryId, category: { id: data.categoryId } }
-        : {}),
+      name: data.name,
+      description: data.description ?? '',
+      price: Number(data.price),
+      originalPrice: data.originalPrice ? Number(data.originalPrice) : null,
+      imageUrl: data.imageUrl ?? '',
+      isAvailable: data.isAvailable ?? true,
+      isGlutenFree: data.isGlutenFree ?? false,
+      isNew: data.isNew ?? false,
+      discountBadge: data.discountBadge ?? '',
+      category: data.categoryId ? { id: data.categoryId } : undefined,
     };
     const response = await api.put<MenuItem>(`/products/${id}`, payload);
     return response.data;

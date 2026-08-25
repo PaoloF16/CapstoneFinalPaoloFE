@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { menuService } from '../../services/menuService';
 import { getTables, createOrder } from '../../services/restaurantService';
+import { useRestaurant } from '../../context/RestaurantContext'; // 👈 Importamos Contexto
 import type { RestaurantTable } from '../../types/restaurant';
 import type { MenuItem as MenuItemType, Category } from '../../types/menu';
 
@@ -16,6 +17,7 @@ interface QuickCartItem {
 export const MobileOrderPage: React.FC = () => {
   const { tableId } = useParams<{ tableId: string }>();
   const navigate = useNavigate();
+  const { settings } = useRestaurant(); // 👈 Moneda y Datos del Restaurante
 
   const [table, setTable] = useState<RestaurantTable | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -49,7 +51,6 @@ export const MobileOrderPage: React.FC = () => {
     initData();
   }, [tableId]);
 
-  // Touch: Tocar plato = +1 en la comanda actual
   const handleQuickAdd = (product: MenuItemType) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -84,7 +85,6 @@ export const MobileOrderPage: React.FC = () => {
     );
   };
 
-  // Enviar NUEVA comanda a cocina
   const handleSendToKitchen = async () => {
     if (!tableId || cart.length === 0) return;
 
@@ -95,7 +95,6 @@ export const MobileOrderPage: React.FC = () => {
         quantity: c.quantity,
       }));
 
-      // Siempre crea una NUEVA orden/ticket para la cocina
       await createOrder({
         tableId,
         items: payloadItems,
@@ -125,7 +124,7 @@ export const MobileOrderPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col font-sans pb-24 select-none">
-      {/* Header Fijo */}
+      {/* Header */}
       <div className="p-3 bg-gray-900 border-b border-gray-800 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <button
           onClick={() => navigate('/mobile/tables')}
@@ -136,7 +135,7 @@ export const MobileOrderPage: React.FC = () => {
 
         <div className="text-center">
           <h2 className="text-base font-black text-white">Mesa #{table?.tableNumber || '...'}</h2>
-          <span className="text-[10px] text-gray-400">Nueva Comanda</span>
+          <span className="text-[10px] text-gray-400">{settings.name}</span>
         </div>
 
         <button
@@ -148,7 +147,7 @@ export const MobileOrderPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Buscador Rápido */}
+      {/* Buscador */}
       <div className="p-3 bg-gray-900/40 border-b border-gray-800/60">
         <input
           type="text"
@@ -159,7 +158,7 @@ export const MobileOrderPage: React.FC = () => {
         />
       </div>
 
-      {/* Píldoras de Categoría */}
+      {/* Categorías */}
       <div className="p-2.5 bg-gray-900/20 border-b border-gray-800 flex gap-1.5 overflow-x-auto scrollbar-none sticky top-14 z-20 backdrop-blur-md">
         <button
           onClick={() => setSelectedCategory('ALL')}
@@ -186,7 +185,7 @@ export const MobileOrderPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Grilla Táctil de Platos */}
+      {/* Catálogo */}
       <div className="p-3.5 grid grid-cols-2 gap-2.5 flex-1">
         {filteredProducts.map((prod) => {
           const inCart = cart.find((i) => i.id === prod.id);
@@ -217,7 +216,7 @@ export const MobileOrderPage: React.FC = () => {
 
               <div className="flex justify-between items-end mt-2 pt-1 border-t border-gray-800/60">
                 <span className="text-red-400 font-black text-sm">
-                  S/ {prod.price.toFixed(2)}
+                  {settings.currency} {prod.price.toFixed(2)}
                 </span>
                 <span className="w-6 h-6 rounded-lg bg-gray-800 border border-gray-700 text-white flex items-center justify-center font-bold text-sm">
                   +
@@ -228,7 +227,7 @@ export const MobileOrderPage: React.FC = () => {
         })}
       </div>
 
-      {/* Barra Inferior "Enviar a Cocina" */}
+      {/* Barra Inferior */}
       {cart.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 bg-gray-900/95 border-t border-gray-800 p-3 flex gap-3 items-center z-30 backdrop-blur-md">
           <div onClick={() => setIsDrawerOpen(true)} className="flex-1 cursor-pointer">
@@ -236,7 +235,7 @@ export const MobileOrderPage: React.FC = () => {
               {totalItemsCount} ítems nuevos
             </span>
             <span className="text-lg font-black text-white">
-              S/ {totalAmount.toFixed(2)}
+              {settings.currency} {totalAmount.toFixed(2)}
             </span>
           </div>
 
@@ -251,13 +250,13 @@ export const MobileOrderPage: React.FC = () => {
         </div>
       )}
 
-      {/* Drawer Resumen */}
+      {/* Drawer */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex justify-end">
           <div className="w-full max-w-sm bg-gray-900 h-full flex flex-col justify-between p-4 border-l border-gray-800 animate-in slide-in-from-right duration-200">
             <div>
               <div className="flex justify-between items-center pb-3 border-b border-gray-800">
-                <h3 className="font-bold text-base text-white">Nueva Comanda — Mesa #{table?.tableNumber}</h3>
+                <h3 className="font-bold text-base text-white">Comanda Mesa #{table?.tableNumber}</h3>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
                   className="text-gray-400 font-bold text-lg p-1 cursor-pointer"
@@ -271,7 +270,9 @@ export const MobileOrderPage: React.FC = () => {
                   <div key={item.id} className="py-3 flex justify-between items-center">
                     <div className="flex-1 pr-2">
                       <p className="font-bold text-sm text-gray-100">{item.name}</p>
-                      <p className="text-xs text-gray-400">S/ {item.price.toFixed(2)} c/u</p>
+                      <p className="text-xs text-gray-400">
+                        {settings.currency} {item.price.toFixed(2)} c/u
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -296,8 +297,8 @@ export const MobileOrderPage: React.FC = () => {
 
             <div className="pt-3 border-t border-gray-800 space-y-3">
               <div className="flex justify-between items-center text-base font-black">
-                <span className="text-gray-300">Total de esta comanda:</span>
-                <span className="text-red-400">S/ {totalAmount.toFixed(2)}</span>
+                <span className="text-gray-300">Total Comanda:</span>
+                <span className="text-red-400">{settings.currency} {totalAmount.toFixed(2)}</span>
               </div>
               <button
                 onClick={() => {

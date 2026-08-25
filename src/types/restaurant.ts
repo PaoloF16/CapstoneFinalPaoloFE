@@ -49,8 +49,9 @@ export interface CreateOrderDTO {
 }
 
 export interface CheckoutDTO {
-  discountValue?: number;
   discountType?: 'PERCENTAGE' | 'FIXED';
+  discountValue?: number;
+  paymentMethod?: 'CASH' | 'CARD' | 'TRANSFER'; // 👈 AGREGAR ESTA LÍNEA
 }
 export interface ProductItem {
   id: string;
