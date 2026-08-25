@@ -1,7 +1,7 @@
 // src/types/restaurant.ts
 
 export type TableStatus = 'AVAILABLE' | 'OCCUPIED' | 'WAITING';
-export type OrderStatus = 'PENDING' | 'IN_PREPARATION' | 'DELIVERED' | 'PAID';
+export type OrderStatus = 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' | 'PAID';
 
 export interface RestaurantTable {
   id: string;
@@ -17,6 +17,9 @@ export interface OrderItem {
     id: string;
     name: string;
     price: number;
+    isGlutenFree?: boolean;
+    description?: string;
+    imageUrl?: string;
   };
   quantity: number;
   unitPrice: number;

@@ -6,7 +6,8 @@ import type {
   CreateOrderDTO, 
   OrderItemRequest, 
   CheckoutDTO, 
-  TableStatus 
+  TableStatus, 
+  OrderStatus
 } from '../types/restaurant';
 
 // --- SERVICIOS DE MESAS ---
@@ -60,4 +61,17 @@ export const checkoutOrder = async (orderId: string, checkoutData: CheckoutDTO):
 export const sendOrderToKitchen = async (orderId: string): Promise<Order> => {
   const response = await api.put<Order>(`/orders/${orderId}/items`);
   return response.data;
+};
+// Agregar en src/services/restaurantService.ts
+
+export const getKitchenOrders = async (): Promise<Order[]> => {
+  const response = await api.get<Order[]>('/orders/kitchen');
+  return response.data || [];
+};
+
+// En src/services/restaurantService.ts
+
+
+export const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<void> => {
+  await api.patch(`/orders/${orderId}/status`, { status });
 };

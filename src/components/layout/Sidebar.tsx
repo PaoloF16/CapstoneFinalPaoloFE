@@ -14,6 +14,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { label: t('nav.tables', 'Mesas / Salón'), path: '/tables', icon: '🪑' },
         { label: t('nav.menu', 'Productos / Menú'), path: '/menu', icon: '🍔' },
+        { label: 'Cocina / KDS', path: '/kitchen', icon: '👨‍🍳' },
         { label: t('nav.settings', 'Configuración'), path: '/settings', icon: '⚙️' },
       ],
     },

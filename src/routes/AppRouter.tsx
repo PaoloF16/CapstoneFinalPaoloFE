@@ -11,6 +11,7 @@ import { SettingsPage } from "../pages/SettingsPage"
 import { MobileLoginPage } from "../pages/mobile/MobileLoginPage"
 import { MobileTablesPage } from "../pages/mobile/MobileTablesPage"
 import { MobileOrderPage } from "../pages/mobile/MobileOrderPage"
+import { KitchenDisplayPage } from "../pages/KitchenDisplayPage"
 
 export const AppRouter: React.FC = () => {
   return (
@@ -28,6 +29,8 @@ export const AppRouter: React.FC = () => {
           <Route path="users" element={<UsersPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/kitchen" element={<KitchenDisplayPage />} />
+
         </Route>
         <Route path="/mobile/login" element={<MobileLoginPage />} />
         <Route path="/mobile/tables" element={<MobileTablesPage />} />

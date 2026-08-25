@@ -2,14 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { menuService } from '../../services/menuService';
-import {
-  getTables,
-  getActiveOrderByTable,
-  createOrder,
-  updateOrderItems
-} from '../../services/restaurantService';
+import { getTables, createOrder } from '../../services/restaurantService';
 import type { RestaurantTable } from '../../types/restaurant';
 import type { MenuItem as MenuItemType, Category } from '../../types/menu';
+
 interface QuickCartItem {
   id: string;
   name: string;
@@ -28,45 +24,23 @@ export const MobileOrderPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [cart, setCart] = useState<QuickCartItem[]>([]);
-  const [orderId, setOrderId] = useState<string | null>(null);
   const [sending, setSending] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const initData = async () => {
       if (!tableId) return;
-
       try {
-        // Cargar datos de la mesa
         const allTables = await getTables();
         const currentTable = allTables.find((t) => t.id === tableId) || null;
         setTable(currentTable);
 
-        // Cargar Categorías y Menú
         const [cats, prods] = await Promise.all([
           menuService.getCategories(),
           menuService.getProducts(),
         ]);
         setCategories(cats);
         setProducts(prods.filter((p) => p.isAvailable));
-
-        // Cargar orden activa si la mesa estaba ocupada
-        try {
-          const activeOrder = await getActiveOrderByTable(tableId);
-          if (activeOrder && activeOrder.items) {
-            setOrderId(activeOrder.id);
-            setCart(
-              activeOrder.items.map((i) => ({
-                id: i.product.id,
-                name: i.product.name,
-                price: i.product.price || i.unitPrice,
-                quantity: i.quantity,
-              }))
-            );
-          }
-        } catch {
-          // Sin orden previa
-        }
       } catch (err) {
         console.error('Error al inicializar comandera:', err);
       }
@@ -75,7 +49,7 @@ export const MobileOrderPage: React.FC = () => {
     initData();
   }, [tableId]);
 
-  // Flujo Touch Ultrarrápido: Tocar = +1
+  // Touch: Tocar plato = +1 en la comanda actual
   const handleQuickAdd = (product: MenuItemType) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -110,7 +84,7 @@ export const MobileOrderPage: React.FC = () => {
     );
   };
 
-  // Enviar pedido a Cocina
+  // Enviar NUEVA comanda a cocina
   const handleSendToKitchen = async () => {
     if (!tableId || cart.length === 0) return;
 
@@ -121,27 +95,27 @@ export const MobileOrderPage: React.FC = () => {
         quantity: c.quantity,
       }));
 
-      if (orderId) {
-        await updateOrderItems(orderId, payloadItems);
-      } else {
-        await createOrder({
-          tableId,
-          items: payloadItems,
-        });
-      }
+      // Siempre crea una NUEVA orden/ticket para la cocina
+      await createOrder({
+        tableId,
+        items: payloadItems,
+      });
 
+      setCart([]);
       navigate('/mobile/tables');
     } catch (err) {
       console.error('Error al enviar comanda:', err);
-      alert('Error de conexión al enviar el pedido a cocina.');
+      alert('Error de conexión al enviar comanda a cocina.');
     } finally {
       setSending(false);
     }
   };
 
-  // Filtrado
   const filteredProducts = products.filter((p) => {
-    const matchesCategory = selectedCategory === 'ALL' || p.categoryId === selectedCategory || p.category?.id === selectedCategory;
+    const matchesCategory =
+      selectedCategory === 'ALL' ||
+      p.categoryId === selectedCategory ||
+      p.category?.id === selectedCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -162,7 +136,7 @@ export const MobileOrderPage: React.FC = () => {
 
         <div className="text-center">
           <h2 className="text-base font-black text-white">Mesa #{table?.tableNumber || '...'}</h2>
-          <span className="text-[10px] text-gray-400">Comanda en directo</span>
+          <span className="text-[10px] text-gray-400">Nueva Comanda</span>
         </div>
 
         <button
@@ -220,15 +194,14 @@ export const MobileOrderPage: React.FC = () => {
             <button
               key={prod.id}
               onClick={() => handleQuickAdd(prod)}
-              className={`relative p-3 rounded-2xl border text-left flex flex-col justify-between min-h-[92px] active:scale-95 transition-all shadow-sm ${
+              className={`relative p-3 rounded-2xl border text-left flex flex-col justify-between min-h-[92px] active:scale-95 transition-all shadow-sm cursor-pointer ${
                 inCart
                   ? 'bg-red-950/30 border-red-500/60 shadow-red-900/20'
                   : 'bg-gray-900 border-gray-800 hover:border-gray-700'
               }`}
             >
-              {/* Badge Cantidad Actual */}
               {inCart && (
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white font-black text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md animate-scale">
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white font-black text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md">
                   {inCart.quantity}
                 </span>
               )}
@@ -255,15 +228,12 @@ export const MobileOrderPage: React.FC = () => {
         })}
       </div>
 
-      {/* Barra Inferior Fija de "Enviar a Cocina" */}
+      {/* Barra Inferior "Enviar a Cocina" */}
       {cart.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 bg-gray-900/95 border-t border-gray-800 p-3 flex gap-3 items-center z-30 backdrop-blur-md">
-          <div
-            onClick={() => setIsDrawerOpen(true)}
-            className="flex-1 cursor-pointer"
-          >
+          <div onClick={() => setIsDrawerOpen(true)} className="flex-1 cursor-pointer">
             <span className="text-[10px] text-gray-400 block font-bold uppercase">
-              {totalItemsCount} ítems listos
+              {totalItemsCount} ítems nuevos
             </span>
             <span className="text-lg font-black text-white">
               S/ {totalAmount.toFixed(2)}
@@ -273,7 +243,7 @@ export const MobileOrderPage: React.FC = () => {
           <button
             onClick={handleSendToKitchen}
             disabled={sending}
-            className="px-6 py-3.5 bg-red-600 active:bg-red-700 hover:bg-red-500 text-white font-black text-sm rounded-xl shadow-lg shadow-red-600/40 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3.5 bg-red-600 active:bg-red-700 text-white font-black text-sm rounded-xl shadow-lg shadow-red-600/40 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <span>👨‍🍳</span>
             <span>{sending ? 'Enviando...' : 'Enviar a Cocina'}</span>
@@ -281,16 +251,16 @@ export const MobileOrderPage: React.FC = () => {
         </div>
       )}
 
-      {/* Drawer / Modal Resumen de Comanda */}
+      {/* Drawer Resumen */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex justify-end">
           <div className="w-full max-w-sm bg-gray-900 h-full flex flex-col justify-between p-4 border-l border-gray-800 animate-in slide-in-from-right duration-200">
             <div>
               <div className="flex justify-between items-center pb-3 border-b border-gray-800">
-                <h3 className="font-bold text-base text-white">Detalle de Comanda</h3>
+                <h3 className="font-bold text-base text-white">Nueva Comanda — Mesa #{table?.tableNumber}</h3>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
-                  className="text-gray-400 font-bold text-lg p-1"
+                  className="text-gray-400 font-bold text-lg p-1 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -301,24 +271,20 @@ export const MobileOrderPage: React.FC = () => {
                   <div key={item.id} className="py-3 flex justify-between items-center">
                     <div className="flex-1 pr-2">
                       <p className="font-bold text-sm text-gray-100">{item.name}</p>
-                      <p className="text-xs text-gray-400">
-                        S/ {item.price.toFixed(2)} c/u
-                      </p>
+                      <p className="text-xs text-gray-400">S/ {item.price.toFixed(2)} c/u</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleUpdateQuantity(item.id, -1)}
-                        className="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 text-white font-black active:scale-95 flex items-center justify-center"
+                        className="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 text-white font-black active:scale-95 flex items-center justify-center cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="font-black text-sm w-5 text-center">
-                        {item.quantity}
-                      </span>
+                      <span className="font-black text-sm w-5 text-center">{item.quantity}</span>
                       <button
                         onClick={() => handleUpdateQuantity(item.id, 1)}
-                        className="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 text-white font-black active:scale-95 flex items-center justify-center"
+                        className="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 text-white font-black active:scale-95 flex items-center justify-center cursor-pointer"
                       >
                         +
                       </button>
@@ -330,7 +296,7 @@ export const MobileOrderPage: React.FC = () => {
 
             <div className="pt-3 border-t border-gray-800 space-y-3">
               <div className="flex justify-between items-center text-base font-black">
-                <span className="text-gray-300">Total:</span>
+                <span className="text-gray-300">Total de esta comanda:</span>
                 <span className="text-red-400">S/ {totalAmount.toFixed(2)}</span>
               </div>
               <button
@@ -339,7 +305,7 @@ export const MobileOrderPage: React.FC = () => {
                   handleSendToKitchen();
                 }}
                 disabled={sending}
-                className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl text-sm shadow-md active:scale-95"
+                className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl text-sm shadow-md active:scale-95 cursor-pointer"
               >
                 {sending ? 'Enviando...' : 'Confirmar y Enviar a Cocina ➔'}
               </button>
