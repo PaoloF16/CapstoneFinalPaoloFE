@@ -68,16 +68,16 @@ export const TablesDashboard: React.FC = () => {
     loadData();
   }, []);
 
- const handleOpenTableOrder = async (table: RestaurantTable) => {
-  setSelectedTable(table);
-  setStagingCart([]);
-  try {
-    const orders = await getActiveOrdersByTable(table.id);
-    setConfirmedOrders(orders);
-  } catch {
-    setConfirmedOrders([]);
-  }
-};
+  const handleOpenTableOrder = async (table: RestaurantTable) => {
+    setSelectedTable(table);
+    setStagingCart([]);
+    try {
+      const orders = await getActiveOrdersByTable(table.id);
+      setConfirmedOrders(orders);
+    } catch {
+      setConfirmedOrders([]);
+    }
+  };
 
   const handleAddToStaging = (product: MenuItem) => {
     setStagingCart((prev) => {
@@ -147,7 +147,7 @@ export const TablesDashboard: React.FC = () => {
     }
   };
 
-  // 🔥 Normalización de ítems confirmados desde cualquier estructura de backend
+  // Normalización de ítems confirmados
   const confirmedItems = confirmedOrders.flatMap((o: any) => {
     const list = o.items || o.orderItems || o.details || [];
     return list.map((item: any) => ({
@@ -170,7 +170,7 @@ export const TablesDashboard: React.FC = () => {
   });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 select-none">
       {/* HEADER SALÓN */}
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-xs">
         <div>
@@ -178,7 +178,7 @@ export const TablesDashboard: React.FC = () => {
             {t('tables.title', 'Salón y Mesas')}
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Gestión visual del estado de mesas y toma de comandas.
+            {t('tables.subtitle', 'Gestión visual del estado de mesas y toma de comandas.')}
           </p>
         </div>
         <button
@@ -190,13 +190,15 @@ export const TablesDashboard: React.FC = () => {
           }}
           className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-all"
         >
-          + Agregar Mesa
+          {t('tables.addTable', '+ Agregar Mesa')}
         </button>
       </div>
 
       {/* GRILLA DE MESAS */}
       {loading ? (
-        <div className="text-center py-16 text-gray-400 font-semibold">Cargando mesas del restaurante...</div>
+        <div className="text-center py-16 text-gray-400 font-semibold">
+          {t('common.loading', 'Cargando mesas del restaurante...')}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {tables.map((table) => {
@@ -214,7 +216,7 @@ export const TablesDashboard: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
-                      MESA
+                      {t('tables.table', 'MESA')}
                     </span>
                     <h3 className="text-3xl font-black text-gray-800 leading-none mt-1">
                       #{table.tableNumber}
@@ -227,16 +229,21 @@ export const TablesDashboard: React.FC = () => {
                         : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                     }`}
                   >
-                    {isOccupied ? 'OCUPADA' : 'DISPONIBLE'}
+                    {isOccupied ? t('common.occupied', 'OCUPADA') : t('common.available', 'DISPONIBLE')}
                   </span>
                 </div>
 
                 <div className="text-xs text-gray-500">
-                  🪑 Capacidad: <strong className="text-gray-700">{table.capacity} personas</strong>
+                  🪑 {t('tables.capacity', 'Capacidad')}:{' '}
+                  <strong className="text-gray-700">
+                    {table.capacity} {t('tables.persons', 'personas')}
+                  </strong>
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                  <span className="text-red-600 font-bold text-xs hover:underline">Ver comanda ➔</span>
+                  <span className="text-red-600 font-bold text-xs hover:underline">
+                    {t('tables.viewOrder', 'Ver comanda ➔')}
+                  </span>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
@@ -246,7 +253,7 @@ export const TablesDashboard: React.FC = () => {
                         setTableForm({ tableNumber: table.tableNumber, capacity: table.capacity });
                         setIsTableModalOpen(true);
                       }}
-                      className="p-1 hover:bg-gray-100 rounded text-xs text-gray-400 hover:text-gray-600"
+                      className="p-1 hover:bg-gray-100 rounded text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
                     >
                       ✏️
                     </button>
@@ -254,12 +261,12 @@ export const TablesDashboard: React.FC = () => {
                       type="button"
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (window.confirm(`¿Eliminar Mesa #${table.tableNumber}?`)) {
+                        if (window.confirm(`${t('tables.confirmDelete', '¿Eliminar Mesa')} #${table.tableNumber}?`)) {
                           await deleteTable(table.id);
                           await loadData();
                         }
                       }}
-                      className="p-1 hover:bg-red-50 rounded text-xs text-gray-400 hover:text-red-500"
+                      className="p-1 hover:bg-red-50 rounded text-xs text-gray-400 hover:text-red-500 cursor-pointer"
                     >
                       🗑️
                     </button>
@@ -280,7 +287,7 @@ export const TablesDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl font-bold text-gray-800">
-                    Mesa #{selectedTable.tableNumber}
+                    {t('tables.table', 'Mesa')} #{selectedTable.tableNumber}
                   </h2>
                   <span
                     className={`px-2.5 py-0.5 text-[10px] font-bold rounded-md uppercase ${
@@ -289,11 +296,13 @@ export const TablesDashboard: React.FC = () => {
                         : 'bg-emerald-100 text-emerald-700'
                     }`}
                   >
-                    {selectedTable.status === 'OCCUPIED' || totalConfirmed > 0 ? 'OCUPADA' : 'DISPONIBLE'}
+                    {selectedTable.status === 'OCCUPIED' || totalConfirmed > 0
+                      ? t('common.occupied', 'OCUPADA')
+                      : t('common.available', 'DISPONIBLE')}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Capacidad: {selectedTable.capacity} personas
+                  {t('tables.capacity', 'Capacidad')}: {selectedTable.capacity} {t('tables.persons', 'personas')}
                 </p>
               </div>
 
@@ -314,7 +323,7 @@ export const TablesDashboard: React.FC = () => {
                 <div className="bg-white border-2 border-red-200 rounded-2xl p-4 shadow-xs space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-red-600 uppercase tracking-wide">
-                      🔥 Nuevos Platos a Enviar
+                      {t('tables.stagingTitle', '🔥 Nuevos Platos a Enviar')}
                     </span>
                     <span className="text-xs font-bold text-gray-500">
                       {settings.currency} {totalStaging.toFixed(2)}
@@ -323,7 +332,7 @@ export const TablesDashboard: React.FC = () => {
 
                   {stagingCart.length === 0 ? (
                     <p className="text-xs text-gray-400 py-3 text-center italic">
-                      Selecciona platos del menú a la derecha para agregarlos a la comanda.
+                      {t('tables.stagingEmpty', 'Selecciona platos del menú a la derecha para agregarlos a la comanda.')}
                     </p>
                   ) : (
                     <div className="divide-y divide-gray-100 space-y-2">
@@ -368,8 +377,8 @@ export const TablesDashboard: React.FC = () => {
                         <span>👨‍🍳</span>
                         <span>
                           {sendingToKitchen
-                            ? 'Enviando a Cocina...'
-                            : `Enviar a Cocina (${stagingCart.reduce((a, b) => a + b.quantity, 0)} ítems)`}
+                            ? t('tables.sending', 'Enviando a Cocina...')
+                            : `${t('tables.sendToKitchen', 'Enviar a Cocina')} (${stagingCart.reduce((a, b) => a + b.quantity, 0)} ${t('tables.items', 'ítems')})`}
                         </span>
                       </button>
                     </div>
@@ -380,7 +389,7 @@ export const TablesDashboard: React.FC = () => {
                 <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                      📋 Consumo Confirmado en Mesa
+                      {t('tables.confirmedTitle', '📋 Consumo Confirmado en Mesa')}
                     </span>
                     <span className="text-xs font-bold text-gray-500">
                       {settings.currency} {totalConfirmed.toFixed(2)}
@@ -389,7 +398,7 @@ export const TablesDashboard: React.FC = () => {
 
                   {confirmedItems.length === 0 ? (
                     <p className="text-xs text-gray-400 py-3 text-center italic">
-                      No hay consumos previos registrados en esta mesa.
+                      {t('tables.confirmedEmpty', 'No hay consumos previos registrados en esta mesa.')}
                     </p>
                   ) : (
                     <div className="divide-y divide-gray-100 max-h-56 overflow-y-auto space-y-2">
@@ -418,12 +427,12 @@ export const TablesDashboard: React.FC = () => {
               <div className="lg:col-span-7 p-5 flex flex-col justify-between overflow-y-auto space-y-4 bg-white">
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
-                    Carta del Restaurante
+                    {t('tables.catalogTitle', 'Carta del Restaurante')}
                   </h3>
 
                   <input
                     type="text"
-                    placeholder="🔍 Buscar plato o bebida..."
+                    placeholder={t('tables.searchPlates', '🔍 Buscar plato o bebida...')}
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
                     className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder-gray-400 outline-none focus:border-red-500"
@@ -439,7 +448,7 @@ export const TablesDashboard: React.FC = () => {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      Todas
+                      {t('tables.allCategories', 'Todas')}
                     </button>
                     {categories.map((c) => (
                       <button
@@ -485,7 +494,7 @@ export const TablesDashboard: React.FC = () => {
             <div className="p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-baseline gap-2">
                 <span className="text-xs text-gray-500 font-bold uppercase">
-                  Total Cuenta:
+                  {t('tables.totalAccount', 'Total Cuenta:')}
                 </span>
                 <span className="text-2xl font-black text-gray-900">
                   {settings.currency} {totalGeneral.toFixed(2)}
@@ -499,8 +508,7 @@ export const TablesDashboard: React.FC = () => {
                   onClick={() => setIsPrecuentaModalOpen(true)}
                   className="flex-1 sm:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer disabled:opacity-40 flex items-center justify-center gap-1.5"
                 >
-                  <span>🧾</span>
-                  <span>Sacar Precuenta</span>
+                  <span>{t('tables.billPreview', 'Sacar Precuenta')}</span>
                 </button>
 
                 <button
@@ -512,8 +520,8 @@ export const TablesDashboard: React.FC = () => {
                   }}
                   className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer disabled:opacity-40 flex items-center justify-center gap-1.5"
                 >
-                  <span>💳</span>
-                  <span>Cobrar / Cerrar Mesa</span>
+                  
+                  <span>{t('tables.checkoutBtn', 'Cobrar / Cerrar Mesa')}</span>
                 </button>
 
                 <button
@@ -521,7 +529,7 @@ export const TablesDashboard: React.FC = () => {
                   onClick={() => setSelectedTable(null)}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-xl cursor-pointer"
                 >
-                  Cerrar Panel
+                  {t('tables.closePanel', 'Cerrar Panel')}
                 </button>
               </div>
             </div>
@@ -536,7 +544,9 @@ export const TablesDashboard: React.FC = () => {
             <div className="text-center border-b pb-3 border-gray-200">
               <h3 className="font-bold text-base uppercase">{settings.name}</h3>
               <p className="text-[11px] text-gray-500">{settings.slogan}</p>
-              <p className="text-xs font-bold mt-2">PRECUENTA - MESA #{selectedTable.tableNumber}</p>
+              <p className="text-xs font-bold mt-2">
+                {t('tables.billTitle', 'PRECUENTA')} - {t('tables.table', 'MESA')} #{selectedTable.tableNumber}
+              </p>
               <p className="text-[10px] text-gray-400">{new Date().toLocaleString()}</p>
             </div>
 
@@ -562,7 +572,7 @@ export const TablesDashboard: React.FC = () => {
 
             <div className="border-t border-gray-200 pt-3 space-y-1 text-xs">
               <div className="flex justify-between text-base font-bold">
-                <span>TOTAL A PAGAR:</span>
+                <span>{t('tables.totalToPay', 'TOTAL A PAGAR:')}</span>
                 <span>
                   {settings.currency} {totalGeneral.toFixed(2)}
                 </span>
@@ -575,14 +585,14 @@ export const TablesDashboard: React.FC = () => {
                 onClick={() => window.print()}
                 className="flex-1 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-black"
               >
-                🖨️ Imprimir Ticket
+                {t('tables.printTicket', '🖨️ Imprimir Ticket')}
               </button>
               <button
                 type="button"
                 onClick={() => setIsPrecuentaModalOpen(false)}
                 className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl cursor-pointer hover:bg-gray-200"
               >
-                Cerrar
+                {t('common.close', 'Cerrar')}
               </button>
             </div>
           </div>
@@ -594,18 +604,20 @@ export const TablesDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white text-gray-900 w-full max-w-md rounded-2xl p-6 shadow-xl space-y-4 border border-gray-200">
             <h3 className="text-lg font-bold text-gray-800">
-              Cobrar y Liberar Mesa #{selectedTable.tableNumber}
+              {t('tables.checkoutTitle', 'Cobrar y Liberar Mesa')} #{selectedTable.tableNumber}
             </h3>
 
             <div className="bg-gray-50 p-4 rounded-xl flex justify-between items-center border border-gray-100">
-              <span className="text-xs font-bold text-gray-500">Total a Cancelar:</span>
+              <span className="text-xs font-bold text-gray-500">{t('tables.totalToPay', 'Total a Cancelar:')}</span>
               <span className="text-2xl font-black text-emerald-600">
                 {settings.currency} {totalGeneral.toFixed(2)}
               </span>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase">Método de Pago</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">
+                {t('tables.paymentMethod', 'Método de Pago')}
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -616,7 +628,7 @@ export const TablesDashboard: React.FC = () => {
                       : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  💵 Efectivo
+                  {t('tables.cash', '💵 Efectivo')}
                 </button>
                 <button
                   type="button"
@@ -627,14 +639,16 @@ export const TablesDashboard: React.FC = () => {
                       : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  💳 Tarjeta / POS
+                  {t('tables.card', '💳 Tarjeta / POS')}
                 </button>
               </div>
             </div>
 
             {paymentMethod === 'EFECTIVO' && (
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Efectivo Recibido</label>
+                <label className="text-xs font-bold text-gray-500 uppercase">
+                  {t('tables.receivedCash', 'Efectivo Recibido')}
+                </label>
                 <input
                   type="number"
                   step="0.01"
@@ -644,7 +658,7 @@ export const TablesDashboard: React.FC = () => {
                 />
                 {Number(cashReceived) >= totalGeneral && (
                   <p className="text-xs font-bold text-emerald-600 mt-1">
-                    Vuelto: {settings.currency} {(Number(cashReceived) - totalGeneral).toFixed(2)}
+                    {t('tables.change', 'Vuelto:')} {settings.currency} {(Number(cashReceived) - totalGeneral).toFixed(2)}
                   </p>
                 )}
               </div>
@@ -656,14 +670,14 @@ export const TablesDashboard: React.FC = () => {
                 onClick={() => setIsPaymentModalOpen(false)}
                 className="flex-1 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-xl cursor-pointer hover:bg-gray-200"
               >
-                Cancelar
+                {t('common.cancel', 'Cancelar')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmPayment}
                 className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs uppercase"
               >
-                ✓ Confirmar Pago
+                {t('tables.confirmPayment', '✓ Confirmar Pago')}
               </button>
             </div>
           </div>
@@ -675,7 +689,7 @@ export const TablesDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl space-y-4 border border-gray-100">
             <h3 className="text-lg font-bold text-gray-800">
-              {editingTable ? 'Editar Mesa' : 'Nueva Mesa'}
+              {editingTable ? t('tables.editTableTitle', 'Editar Mesa') : t('tables.newTableTitle', 'Nueva Mesa')}
             </h3>
             <form
               onSubmit={async (e) => {
@@ -691,7 +705,9 @@ export const TablesDashboard: React.FC = () => {
               className="space-y-3"
             >
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase">Número de Mesa</label>
+                <label className="text-xs font-bold text-gray-500 uppercase">
+                  {t('tables.tableNumberLabel', 'Número de Mesa')}
+                </label>
                 <input
                   type="number"
                   required
@@ -701,7 +717,9 @@ export const TablesDashboard: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase">Capacidad (Personas)</label>
+                <label className="text-xs font-bold text-gray-500 uppercase">
+                  {t('tables.tableCapacityLabel', 'Capacidad (Personas)')}
+                </label>
                 <input
                   type="number"
                   required
@@ -716,13 +734,13 @@ export const TablesDashboard: React.FC = () => {
                   onClick={() => setIsTableModalOpen(false)}
                   className="flex-1 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl cursor-pointer hover:bg-gray-200"
                 >
-                  Cancelar
+                  {t('common.cancel', 'Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs"
                 >
-                  Guardar
+                  {t('common.save', 'Guardar')}
                 </button>
               </div>
             </form>

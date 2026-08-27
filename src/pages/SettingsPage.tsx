@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useRestaurant, type RestaurantSettings } from '../context/RestaurantContext';
 
 export const SettingsPage: React.FC = () => {
-  const { t, language, changeLanguage } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { settings, updateSettings, resetSettings } = useRestaurant();
 
   const [formState, setFormState] = useState<RestaurantSettings>({ ...settings });
@@ -29,14 +29,15 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const currentLang = String(language).toUpperCase();
+
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      
+    <div className="p-6 max-w-7xl mx-auto space-y-6 select-none">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">{t('settings.title', 'Configuración del Restaurante')}</h1>
-          <p className="text-sm text-gray-500">Personaliza la identidad de tu negocio, logo externo, moneda, precuenta e idioma del sistema.</p>
+          <p className="text-sm text-gray-500">{t('settings.subtitle', 'Personaliza la identidad de tu negocio, logo externo, moneda, precuenta e idioma del sistema.')}</p>
         </div>
 
         <div className="flex gap-2">
@@ -45,78 +46,80 @@ export const SettingsPage: React.FC = () => {
             onClick={handleRestore}
             className="px-4 py-2 border border-gray-300 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            Restaurar Valores
+            {t('settings.resetValues', 'Restaurar Valores')}
           </button>
           <button
             type="button"
             onClick={handleSave}
             className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            <span>💾</span>
-            <span>Guardar Cambios</span>
+            
+            <span>{t('settings.saveChanges', 'Guardar Cambios')}</span>
           </button>
         </div>
       </div>
 
       {saveSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-bold rounded-2xl animate-in fade-in">
-          ✓ Configuración guardada y aplicada exitosamente a todo el sistema.
+          ✓ {t('settings.saveSuccess', 'Configuración guardada y aplicada exitosamente a todo el sistema.')}
         </div>
       )}
 
       {/* PESTAÑAS */}
       <div className="flex gap-2 border-b border-gray-200 pb-2 overflow-x-auto scrollbar-none">
         <button
+          type="button"
           onClick={() => setActiveTab('general')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'general' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
           }`}
         >
-          🏪 Identidad y Marca
+          🏪 {t('settings.tabIdentity', 'Identidad y Marca')}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('financial')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'financial' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
           }`}
         >
-          💰 Moneda e Impuestos
+          💰 {t('settings.tabCurrency', 'Moneda e Impuestos')}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('ticket')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'ticket' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
           }`}
         >
-          🧾 Precuenta y Tickets
+          🧾 {t('settings.tabTickets', 'Precuenta y Tickets')}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('system')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'system' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
           }`}
         >
-          🌐 Idioma y Sistema
+          🌐 {t('settings.tabSystem', 'Idioma y Sistema')}
         </button>
       </div>
 
       {/* CONTENIDO PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
         {/* FORMULARIO */}
         <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-5">
           <form onSubmit={handleSave} className="space-y-4">
-            
             {/* PESTAÑA: IDENTIDAD Y MARCA */}
             {activeTab === 'general' && (
               <div className="space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
-                  Datos de la Empresa y Logotipo
+                  {t('settings.sectionBusiness', 'DATOS DE LA EMPRESA Y LOGOTIPO')}
                 </h3>
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                    Nombre Comercial del Restaurante
+                    {t('settings.businessName', 'NOMBRE COMERCIAL DEL RESTAURANTE')}
                   </label>
                   <input
                     type="text"
@@ -130,7 +133,7 @@ export const SettingsPage: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                    Eslogan o Subtítulo
+                    {t('settings.slogan', 'ESLOGAN O SUBTÍTULO')}
                   </label>
                   <input
                     type="text"
@@ -144,11 +147,10 @@ export const SettingsPage: React.FC = () => {
                 {/* LOGO: IMAGEN EXTERNA E INICIAL */}
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
                   <span className="text-xs font-extrabold text-gray-700 uppercase tracking-wider block">
-                    Logotipo del Restaurante
+                    {t('settings.logoTitle', 'Logotipo del Restaurante')}
                   </span>
 
                   <div className="flex items-center gap-4">
-                    {/* Preview del logo */}
                     <div className="w-14 h-14 rounded-2xl bg-white border-2 border-gray-300 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
                       {formState.logoUrl ? (
                         <img
@@ -167,7 +169,7 @@ export const SettingsPage: React.FC = () => {
                     <div className="flex-1 space-y-2">
                       <div>
                         <label className="block text-[11px] font-bold text-gray-600 uppercase mb-0.5">
-                          URL de Imagen Externa (PNG, JPG, SVG)
+                          {t('settings.logoUrl', 'URL DE IMAGEN EXTERNA (PNG, JPG, SVG)')}
                         </label>
                         <input
                           type="url"
@@ -182,7 +184,7 @@ export const SettingsPage: React.FC = () => {
 
                   <div>
                     <label className="block text-[11px] font-bold text-gray-600 uppercase mb-0.5">
-                      Inicial de Respaldo (Si no hay imagen o falla el enlace)
+                      {t('settings.logoFallback', 'INICIAL DE RESPALDO (SI NO HAY IMAGEN O FALLA EL ENLACE)')}
                     </label>
                     <input
                       type="text"
@@ -197,7 +199,7 @@ export const SettingsPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      RUC / NIF / CIF (Identificador Fiscal)
+                      {t('settings.taxId', 'RUC / NIF / CIF (IDENTIFICADOR FISCAL)')}
                     </label>
                     <input
                       type="text"
@@ -209,7 +211,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Teléfono / WhatsApp
+                      {t('settings.phone', 'TELÉFONO / WHATSAPP')}
                     </label>
                     <input
                       type="text"
@@ -224,7 +226,7 @@ export const SettingsPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Correo Electrónico
+                      {t('settings.email', 'CORREO ELECTRÓNICO')}
                     </label>
                     <input
                       type="email"
@@ -236,7 +238,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Dirección del Local
+                      {t('settings.address', 'DIRECCIÓN DEL LOCAL')}
                     </label>
                     <input
                       type="text"
@@ -254,13 +256,13 @@ export const SettingsPage: React.FC = () => {
             {activeTab === 'financial' && (
               <div className="space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
-                  Moneda y Configuración Fiscal
+                  {t('settings.tabCurrency', 'Moneda y Configuración Fiscal')}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Símbolo Moneda
+                      {t('settings.currencyConfigured', 'Símbolo Moneda')}
                     </label>
                     <select
                       value={formState.currency}
@@ -311,7 +313,7 @@ export const SettingsPage: React.FC = () => {
             {activeTab === 'ticket' && (
               <div className="space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
-                  Personalización de Comprobante / Precuenta
+                  {t('settings.tabTickets', 'Personalización de Comprobante / Precuenta')}
                 </h3>
 
                 <div>
@@ -346,21 +348,21 @@ export const SettingsPage: React.FC = () => {
             {activeTab === 'system' && (
               <div className="space-y-4 animate-in fade-in">
                 <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
-                  Idioma y Preferencias de Interfaz
+                  {t('settings.tabSystem', 'Idioma y Preferencias de Interfaz')}
                 </h3>
 
                 <div className="max-w-xs">
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
-                    {t('settings.selectLanguage', 'Selecciona un idioma')}
+                    Selecciona un idioma
                   </label>
                   <select
-                    value={language}
-                    onChange={(e) => changeLanguage(e.target.value as 'es' | 'en' | 'it')}
+                    value={currentLang}
+                    onChange={(e) => setLanguage(e.target.value)}
                     className="w-full p-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-red-500 outline-none cursor-pointer bg-white"
                   >
-                    <option value="es">🇪🇸 {t('settings.spanish', 'Español')}</option>
-                    <option value="en">🇬🇧 {t('settings.english', 'Inglés')}</option>
-                    <option value="it">🇮🇹 {t('settings.italian', 'Italiano')}</option>
+                    <option value="ES">🇪🇸 Español</option>
+                    <option value="EN">🇬🇧 English</option>
+                    <option value="IT">🇮🇹 Italiano</option>
                   </select>
                 </div>
               </div>
@@ -371,7 +373,7 @@ export const SettingsPage: React.FC = () => {
                 type="submit"
                 className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-transform active:scale-95"
               >
-                Guardar Configuración
+                {t('settings.saveConfigBtn', 'GUARDAR CONFIGURACIÓN')}
               </button>
             </div>
           </form>
@@ -381,14 +383,12 @@ export const SettingsPage: React.FC = () => {
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="font-bold text-xs text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <span>👁️</span> Vista Previa del Ticket
+              <span>👁️</span> {t('settings.ticketPreview', 'VISTA PREVIA DEL TICKET')}
             </h3>
 
             {/* Simulación Ticket Térmico */}
             <div className="bg-amber-50/40 p-5 rounded-xl border border-dashed border-gray-300 font-mono text-xs text-gray-800 space-y-3 shadow-inner">
               <div className="text-center space-y-1 border-b border-gray-300 pb-3">
-                
-                {/* Logo en Ticket si existe */}
                 {formState.logoUrl && (
                   <img
                     src={formState.logoUrl}
@@ -447,13 +447,14 @@ export const SettingsPage: React.FC = () => {
 
           <div className="mt-4 p-3 bg-gray-50 rounded-xl text-center">
             <span className="text-xs text-gray-500 font-bold">
-              Moneda configurada: <span className="text-red-600 font-black">{formState.currency}</span>
+              {t('settings.currencyConfigured', 'Moneda configurada:')}{' '}
+              <span className="text-red-600 font-black">{formState.currency}</span>
             </span>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 };
+
+export default SettingsPage;

@@ -6,6 +6,7 @@ import {
 } from "../services/restaurantService"
 import type { Order, OrderStatus } from "../types/restaurant"
 import { useRestaurant } from "../context/RestaurantContext"
+import { useLanguage } from "../context/LanguageContext"
 
 // Generador de pitido sonoro para nuevas comandas en cocina
 const playKitchenAlertSound = () => {
@@ -35,6 +36,8 @@ const playKitchenAlertSound = () => {
 
 export const KitchenDisplayPage: React.FC = () => {
   const { settings } = useRestaurant()
+  const { t } = useLanguage()
+
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
@@ -146,33 +149,34 @@ export const KitchenDisplayPage: React.FC = () => {
           <div className="hidden sm:flex items-center gap-1.5 bg-[#0d0f12] p-1 rounded-xl border border-gray-800 text-xs">
             <button
               onClick={() => setFilterStatus("ALL")}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                 filterStatus === "ALL"
                   ? "bg-red-600 text-white"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Todos ({orders.length})
+              {t("kitchen.allTab", "Todos")} ({orders.length})
             </button>
             <button
               onClick={() => setFilterStatus("PENDING")}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                 filterStatus === "PENDING"
                   ? "bg-amber-600 text-white"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Pendientes ({orders.filter((o) => o.status === "PENDING").length})
+              {t("kitchen.pendingTab", "Pendientes")} (
+              {orders.filter((o) => o.status === "PENDING").length})
             </button>
             <button
               onClick={() => setFilterStatus("IN_PREPARATION")}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                 filterStatus === "IN_PREPARATION"
                   ? "bg-blue-600 text-white"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              En Marcha (
+              {t("kitchen.inPrepTab", "En Marcha")} (
               {orders.filter((o) => o.status === "IN_PREPARATION").length})
             </button>
           </div>
@@ -181,18 +185,22 @@ export const KitchenDisplayPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
               soundEnabled
                 ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-400"
                 : "bg-gray-800 border-gray-700 text-gray-500"
             }`}
           >
-            <span>{soundEnabled ? "🔔 Alarma ON" : "🔕 Silencio"}</span>
+            <span>
+              {soundEnabled
+                ? `🔔 ${t("kitchen.alarmOn", "Alarma ON")}`
+                : `🔕 ${t("kitchen.alarmOff", "Silencio")}`}
+            </span>
           </button>
 
           <button
             onClick={toggleFullScreen}
-            className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold border border-gray-700"
+            className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold border border-gray-700 cursor-pointer"
             title="Pantalla Completa"
           >
             ⛶
@@ -200,7 +208,7 @@ export const KitchenDisplayPage: React.FC = () => {
 
           <div className="text-right pl-3 border-l border-gray-800">
             <span className="text-xs text-gray-400 font-mono block">
-              Hora Salón
+              {t("kitchen.hallTime", "Hora Salón")}
             </span>
             <span className="text-lg font-black text-white font-mono leading-none">
               {currentTime.toLocaleTimeString()}
@@ -213,17 +221,21 @@ export const KitchenDisplayPage: React.FC = () => {
       <main className="flex-1 p-6 overflow-x-auto overflow-y-auto">
         {loading ? (
           <div className="h-full flex items-center justify-center text-gray-500 font-bold text-lg">
-            Conectando con comandas de cocina...
+            {t("common.loading", "Conectando con comandas de cocina...")}
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-gray-900 border border-gray-800 rounded-full flex items-center justify-center text-3xl mb-4">
               🍳
             </div>
-            <h2 className="text-xl font-bold text-gray-300">¡Cocina al día!</h2>
+            <h2 className="text-xl font-bold text-gray-300">
+              {t("kitchen.allCaughtUp", "¡Cocina al día!")}
+            </h2>
             <p className="text-sm text-gray-500 mt-1 max-w-sm">
-              No hay comandas pendientes en este momento. Las nuevas órdenes
-              ingresarán automáticamente.
+              {t(
+                "kitchen.noOrders",
+                "No hay comandas pendientes en este momento. Las nuevas órdenes ingresarán automáticamente.",
+              )}
             </p>
           </div>
         ) : (
@@ -233,6 +245,7 @@ export const KitchenDisplayPage: React.FC = () => {
               const isUrgent = elapsed >= 20
               const isWarning = elapsed >= 10 && elapsed < 20
               const isPending = order.status === "PENDING"
+              const isTakeaway = order.table?.tableNumber === 999
 
               return (
                 <div
@@ -257,10 +270,14 @@ export const KitchenDisplayPage: React.FC = () => {
                   >
                     <div>
                       <span className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider block">
-                        Mesa Asignada
+                        {isTakeaway
+                          ? "🛍️ TAKEAWAY"
+                          : `${t("kitchen.table", "Mesa")} #${order.table?.tableNumber || "?"}`}
                       </span>
                       <h3 className="text-2xl font-black text-white">
-                        #{order.table?.tableNumber || "?"}
+                        {isTakeaway
+                          ? "LLEVAR"
+                          : `#${order.table?.tableNumber || "?"}`}
                       </h3>
                     </div>
 
@@ -277,7 +294,9 @@ export const KitchenDisplayPage: React.FC = () => {
                         ⏱️ {elapsed} min
                       </span>
                       <span className="text-[10px] text-gray-400 block mt-1 uppercase font-bold">
-                        {isPending ? "🔴 Pendiente" : "🔵 En Marcha"}
+                        {isPending
+                          ? `🔴 ${t("kitchen.pending", "Pendiente")}`
+                          : `🔵 ${t("kitchen.inPrep", "En Marcha")}`}
                       </span>
                     </div>
                   </div>
@@ -310,21 +329,22 @@ export const KitchenDisplayPage: React.FC = () => {
                   <div className="p-3 bg-[#13151b] border-t border-gray-800 flex flex-col gap-2">
                     {isPending ? (
                       <button
+                        type="button"
                         onClick={() =>
                           handleStatusChange(order.id, "IN_PREPARATION")
                         }
                         className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-black text-sm rounded-xl uppercase tracking-wider transition-transform active:scale-95 cursor-pointer shadow-lg shadow-blue-600/30"
                       >
-                        👨‍🍳 Empezar a Cocinar
+                        👨‍🍳 {t("kitchen.startPrep", "Empezar a Cocinar")}
                       </button>
                     ) : null}
 
                     <button
+                      type="button"
                       onClick={() => handleStatusChange(order.id, "READY")}
-                      className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-base rounded-xl uppercase tracking-wider transition-transform active:scale-95 cursor-pointer shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-base rounded-xl uppercase tracking-wider transition-transform active:scale-95 cursor-pointer shadow-lg shadow-emerald-600/30 flex items-center justify-center"
                     >
-                      <span>✓</span>
-                      <span>MARCAR COMO LISTO</span>
+                      {t("kitchen.markReady")}
                     </button>
                   </div>
                 </div>
@@ -336,3 +356,5 @@ export const KitchenDisplayPage: React.FC = () => {
     </div>
   )
 }
+
+export default KitchenDisplayPage
