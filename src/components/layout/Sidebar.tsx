@@ -61,6 +61,12 @@ export const Sidebar: React.FC = () => {
       title: t('nav.management', 'Gestión'),
       items: [
         {
+          label: t('nav.reports', 'Reportes y Ventas'),
+          path: '/reports',
+          icon: '📊',
+          allowedRoles: ['ADMIN', 'SUPER_ADMIN'],
+        },
+        {
           label: t('nav.users', 'Personas / Personal'),
           path: '/users',
           icon: '👥',

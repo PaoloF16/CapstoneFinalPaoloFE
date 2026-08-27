@@ -69,15 +69,15 @@ export const TablesDashboard: React.FC = () => {
   }, []);
 
  const handleOpenTableOrder = async (table: RestaurantTable) => {
-    setSelectedTable(table);
-    setStagingCart([]);
-    try {
-      const orders = await getActiveOrdersByTable(table.id);
-      setConfirmedOrders(orders);
-    } catch {
-      setConfirmedOrders([]);
-    }
-  };
+  setSelectedTable(table);
+  setStagingCart([]);
+  try {
+    const orders = await getActiveOrdersByTable(table.id);
+    setConfirmedOrders(orders);
+  } catch {
+    setConfirmedOrders([]);
+  }
+};
 
   const handleAddToStaging = (product: MenuItem) => {
     setStagingCart((prev) => {

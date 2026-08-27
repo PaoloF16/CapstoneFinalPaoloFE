@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { MobileLoginPage } from '../pages/mobile/MobileLoginPage';
+import { CustomerKioskPage } from '../pages/CustomerKioskPage';
 
 // Páginas del Sistema
 import { TablesDashboard } from '../pages/TablesDashboard';
@@ -17,6 +18,7 @@ import { SettingsPage } from '../pages/SettingsPage';
 import { UsersPage } from '../pages/UsersPage';
 import { MobileOrderPage } from '../pages/mobile/MobileOrderPage';
 import { MobileTablesPage } from '../pages/mobile/MobileTablesPage';
+import { ReportsPage } from '../pages/ReportsPage';
 
 const RootRedirect: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -42,6 +44,8 @@ export const AppRouter: React.FC = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/mobile/login" element={<MobileLoginPage />} />
+      <Route path="/kiosk" element={<CustomerKioskPage />} />
+      <Route path="/order" element={<CustomerKioskPage />} />
 
       {/* 🔒 Protegidas por Rol */}
       <Route
@@ -79,6 +83,14 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+  path="/reports"
+  element={
+    <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN']}>
+      <ReportsPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/users"
