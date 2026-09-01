@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { kioskService, type SelfOrderPayload } from '../services/kioskService';
 import { useRestaurant } from '../context/RestaurantContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { Category, MenuItem } from '../types/menu';
 import type { RestaurantTable } from '../types/restaurant';
 
@@ -12,6 +13,15 @@ interface CartItem {
 
 export const CustomerKioskPage: React.FC = () => {
   const { settings } = useRestaurant();
+  const { t, language, setLanguage } = useLanguage();
+
+  const currentLang = String(language).toUpperCase();
+
+  const languages = [
+    { code: 'ES', label: 'ES', flag: '🇪🇸' },
+    { code: 'EN', label: 'EN', flag: '🇬🇧' },
+    { code: 'IT', label: 'IT', flag: '🇮🇹' },
+  ];
 
   // Estados de datos
   const [categories, setCategories] = useState<Category[]>([]);
@@ -106,11 +116,13 @@ export const CustomerKioskPage: React.FC = () => {
       setCart([]);
       setOrderSuccessTicket({
         id: orderResult.id,
-        number: orderResult.table?.tableNumber === 999 ? 'LLEVAR' : `#${orderResult.table?.tableNumber || '1'}`,
+        number: orderResult.table?.tableNumber === 999 
+          ? t('kiosk.takeawayBadge', 'LLEVAR') 
+          : `#${orderResult.table?.tableNumber || '1'}`,
       });
     } catch (err) {
       console.error('Error al procesar pago del pedido:', err);
-      alert('No se pudo procesar el pago. Por favor intenta de nuevo.');
+      alert('Error al procesar el pago.');
     } finally {
       setIsProcessingPayment(false);
     }
@@ -126,8 +138,8 @@ export const CustomerKioskPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-bold text-base">
-        Cargando experiencia de autoservicio...
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-bold text-base select-none">
+        {t('kiosk.loading', 'Cargando experiencia de autoservicio...')}
       </div>
     );
   }
@@ -136,21 +148,45 @@ export const CustomerKioskPage: React.FC = () => {
   if (!orderType && !orderSuccessTicket) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-600 via-rose-600 to-amber-500 flex flex-col justify-between p-6 sm:p-12 text-white select-none">
-        <div className="text-center space-y-2 mt-8">
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-white text-red-600 flex items-center justify-center font-black text-3xl shadow-xl">
-            {settings.logoInitial}
+        {/* Barra superior con selector de idioma para clientes */}
+        <div className="flex justify-between items-center max-w-5xl w-full mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center font-black text-xl shadow-lg">
+              {settings.logoInitial}
+            </div>
+            <div>
+              <h2 className="text-xl font-black">{settings.name}</h2>
+              <p className="text-xs text-red-100 font-medium">{settings.slogan}</p>
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight">{settings.name}</h1>
-          <p className="text-sm sm:text-base text-red-100 font-medium">{settings.slogan}</p>
+
+          {/* Selector de idioma flotante */}
+          <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-md p-1.5 rounded-2xl border border-white/20">
+            {languages.map(({ code, label, flag }) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setLanguage(code)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                  currentLang === code
+                    ? 'bg-white text-red-600 shadow-md scale-105'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>{flag}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="max-w-3xl w-full mx-auto space-y-6">
-          <h2 className="text-center text-xl sm:text-2xl font-black uppercase tracking-wide">
-            ¿Cómo deseas disfrutar tu pedido hoy?
+        <div className="max-w-3xl w-full mx-auto space-y-6 my-auto py-8">
+          <h2 className="text-center text-2xl sm:text-4xl font-black uppercase tracking-wide drop-shadow-sm">
+            {t('kiosk.selectMode', '¿Cómo deseas disfrutar tu pedido hoy?')}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Opción Para Llevar (Sin Colas / QR) */}
+            {/* Opción Para Llevar */}
             <button
               type="button"
               onClick={() => setOrderType('TAKEAWAY')}
@@ -160,14 +196,16 @@ export const CustomerKioskPage: React.FC = () => {
                 🛍️
               </div>
               <div className="text-center">
-                <h3 className="text-2xl font-black uppercase text-gray-800">Para Llevar</h3>
+                <h3 className="text-2xl font-black uppercase text-gray-800">
+                  {t('kiosk.takeaway', 'Para Llevar')}
+                </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  Pide directamente, paga al instante y recoge sin hacer cola en caja.
+                  {t('kiosk.takeawayDesc', 'Pide directamente, paga al instante y recoge sin hacer cola en caja.')}
                 </p>
               </div>
             </button>
 
-            {/* Opción Comer Aquí (Mesa / Localizador) */}
+            {/* Opción Comer Aquí */}
             <button
               type="button"
               onClick={() => setOrderType('DINE_IN')}
@@ -177,9 +215,11 @@ export const CustomerKioskPage: React.FC = () => {
                 🍽️
               </div>
               <div className="text-center">
-                <h3 className="text-2xl font-black uppercase text-gray-800">Comer en el Salón</h3>
+                <h3 className="text-2xl font-black uppercase text-gray-800">
+                  {t('kiosk.dineIn', 'Comer en el Salón')}
+                </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  Elige tu mesa, ordena desde la pantalla y te lo llevamos listo.
+                  {t('kiosk.dineInDesc', 'Elige tu mesa, ordena desde la pantalla y te lo llevamos listo.')}
                 </p>
               </div>
             </button>
@@ -187,7 +227,7 @@ export const CustomerKioskPage: React.FC = () => {
         </div>
 
         <div className="text-center text-xs text-red-200">
-          ⚡ Sistema de Autoservicio Digital • Tu comanda se enviará a cocina tras confirmar el pago.
+          {t('kiosk.systemNotice', '⚡ Sistema de Autoservicio Digital • Tu comanda se enviará a cocina tras confirmar el pago.')}
         </div>
       </div>
     );
@@ -204,16 +244,20 @@ export const CustomerKioskPage: React.FC = () => {
 
           <div>
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">
-              ¡Pago Confirmado con Éxito!
+              {t('kiosk.successBadge', '¡Pago Confirmado con Éxito!')}
             </span>
-            <h2 className="text-3xl font-black text-gray-900 mt-1">Comanda en Cocina</h2>
+            <h2 className="text-3xl font-black text-gray-900 mt-1">
+              {t('kiosk.inKitchen', 'Comanda en Cocina')}
+            </h2>
             <p className="text-xs text-gray-500 mt-2">
-              Nuestro equipo culinario ya está preparando tus platos.
+              {t('kiosk.kitchenPrepDesc', 'Nuestro equipo culinario ya está preparando tus platos.')}
             </p>
           </div>
 
           <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-300">
-            <span className="text-xs font-bold text-gray-400 uppercase">Número de Retiro / Mesa</span>
+            <span className="text-xs font-bold text-gray-400 uppercase">
+              {t('kiosk.pickupNumberLabel', 'Número de Retiro / Mesa')}
+            </span>
             <p className="text-5xl font-black text-red-600 mt-2 tracking-tight">
               {orderSuccessTicket.number}
             </p>
@@ -224,7 +268,7 @@ export const CustomerKioskPage: React.FC = () => {
             onClick={resetAll}
             className="w-full py-4 bg-red-600 hover:bg-red-700 text-white text-sm font-black uppercase tracking-wider rounded-2xl shadow-md cursor-pointer transition-all active:scale-98"
           >
-            Hacer Otro Pedido
+            {t('kiosk.orderAnother', 'Hacer Otro Pedido')}
           </button>
         </div>
       </div>
@@ -242,7 +286,7 @@ export const CustomerKioskPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-between select-none">
       {/* Barra Superior */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
@@ -252,23 +296,44 @@ export const CustomerKioskPage: React.FC = () => {
           <div>
             <h1 className="text-lg font-black text-gray-900 leading-tight">{settings.name}</h1>
             <span className="text-[11px] font-bold text-red-600 uppercase flex items-center gap-1">
-              <span>{orderType === 'TAKEAWAY' ? '🛍️ Para Llevar' : '🍽️ Comer en Salón'}</span>
+              <span>{orderType === 'TAKEAWAY' ? `🛍️ ${t('kiosk.takeaway', 'Para Llevar')}` : `🍽️ ${t('kiosk.dineIn', 'Comer en Salón')}`}</span>
               {orderType === 'DINE_IN' && selectedTableId && (
                 <span className="text-gray-600">
-                  (Mesa #{tables.find((t) => t.id === selectedTableId)?.tableNumber})
+                  ({t('kitchen.table', 'Mesa')} #{tables.find((t) => t.id === selectedTableId)?.tableNumber})
                 </span>
               )}
             </span>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={resetAll}
-          className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 cursor-pointer transition-colors"
-        >
-          ✕ Cambiar Modo
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Selector de idioma en el catálogo */}
+          <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl border border-gray-200">
+            {languages.map(({ code, label, flag }) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setLanguage(code)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1 ${
+                  currentLang === code
+                    ? 'bg-red-600 text-white shadow-xs'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span>{flag}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={resetAll}
+            className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 cursor-pointer transition-colors"
+          >
+            {t('kiosk.changeMode', '✕ Cambiar Modo')}
+          </button>
+        </div>
       </header>
 
       {/* Contenedor Principal (Catálogo + Carrito) */}
@@ -279,17 +344,17 @@ export const CustomerKioskPage: React.FC = () => {
           {orderType === 'DINE_IN' && (
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-2">
               <label className="block text-xs font-bold text-gray-700 uppercase">
-                🪑 Selecciona tu Mesa en el Salón:
+                {t('kiosk.selectTable', '🪑 Selecciona tu Mesa en el Salón:')}
               </label>
               <select
                 value={selectedTableId}
                 onChange={(e) => setSelectedTableId(e.target.value)}
                 className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold outline-none focus:border-red-500"
               >
-                <option value="">-- Elige el número de tu mesa --</option>
+                <option value="">{t('kiosk.chooseTableOption', '-- Elige el número de tu mesa --')}</option>
                 {tables.map((tbl) => (
                   <option key={tbl.id} value={tbl.id}>
-                    Mesa #{tbl.tableNumber} (Capacidad: {tbl.capacity} personas)
+                    {t('kitchen.table', 'Mesa')} #{tbl.tableNumber} ({t('kiosk.capacityLabel', 'Capacidad')}: {tbl.capacity} {t('kiosk.peopleLabel', 'personas')})
                   </option>
                 ))}
               </select>
@@ -300,7 +365,7 @@ export const CustomerKioskPage: React.FC = () => {
           <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3">
             <input
               type="text"
-              placeholder="🔍 ¿Qué se te antoja hoy? (Hamburguesas, Bebidas, Postres...)"
+              placeholder={t('kiosk.searchPlaceholder', '🔍 ¿Qué se te antoja hoy?')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold outline-none focus:border-red-500"
@@ -316,7 +381,7 @@ export const CustomerKioskPage: React.FC = () => {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                Todas las Opciones
+                {t('kiosk.allOptions', 'Todas las Opciones')}
               </button>
               {categories.map((c) => (
                 <button
@@ -395,7 +460,7 @@ export const CustomerKioskPage: React.FC = () => {
                         onClick={() => addToCart(p)}
                         className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors"
                       >
-                        + Agregar
+                        {t('kiosk.add', '+ Agregar')}
                       </button>
                     )}
                   </div>
@@ -410,7 +475,7 @@ export const CustomerKioskPage: React.FC = () => {
           <div>
             <div className="flex justify-between items-center border-b border-gray-100 pb-3">
               <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">
-                🛒 Mi Bandeja ({totalItemsCount})
+                🛒 {t('kiosk.myTray', 'Mi Bandeja')} ({totalItemsCount})
               </h3>
               {cart.length > 0 && (
                 <button
@@ -418,14 +483,14 @@ export const CustomerKioskPage: React.FC = () => {
                   onClick={() => setCart([])}
                   className="text-[11px] font-bold text-gray-400 hover:text-red-500 cursor-pointer"
                 >
-                  Vaciar
+                  {t('kiosk.clear', 'Vaciar')}
                 </button>
               )}
             </div>
 
             {cart.length === 0 ? (
               <div className="py-12 text-center text-gray-400 text-xs italic">
-                Aún no has agregado platos a tu bandeja.
+                {t('kiosk.emptyTray', 'Aún no has agregado platos a tu bandeja.')}
               </div>
             ) : (
               <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto space-y-2 py-2">
@@ -434,7 +499,7 @@ export const CustomerKioskPage: React.FC = () => {
                     <div className="flex-1 pr-2">
                       <p className="font-bold text-gray-800">{item.product.name}</p>
                       <p className="text-[11px] text-gray-400 font-semibold">
-                        {settings.currency} {item.product.price.toFixed(2)} c/u
+                        {settings.currency} {item.product.price.toFixed(2)} {t('kiosk.unitPrice', 'c/u')}
                       </p>
                     </div>
 
@@ -468,7 +533,9 @@ export const CustomerKioskPage: React.FC = () => {
 
           <div className="border-t border-gray-100 pt-4 space-y-3">
             <div className="flex justify-between items-baseline">
-              <span className="text-xs font-bold text-gray-500 uppercase">Total a Pagar:</span>
+              <span className="text-xs font-bold text-gray-500 uppercase">
+                {t('kiosk.totalPay', 'Total a Pagar:')}
+              </span>
               <span className="text-2xl font-black text-gray-900">
                 {settings.currency} {totalCart.toFixed(2)}
               </span>
@@ -481,12 +548,12 @@ export const CustomerKioskPage: React.FC = () => {
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 active:scale-98"
             >
               <span>💳</span>
-              <span>Pagar y Enviar a Cocina</span>
+              <span>{t('kiosk.payAndSend', 'Pagar y Enviar a Cocina')}</span>
             </button>
 
             {orderType === 'DINE_IN' && !selectedTableId && cart.length > 0 && (
               <p className="text-[11px] text-red-500 text-center font-bold">
-                ⚠️ Por favor selecciona tu número de mesa arriba para continuar.
+                {t('kiosk.selectMesaAlert', '⚠️ Por favor selecciona tu número de mesa arriba para continuar.')}
               </p>
             )}
           </div>
@@ -499,16 +566,20 @@ export const CustomerKioskPage: React.FC = () => {
           <div className="bg-white text-gray-900 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 border border-gray-200">
             <div className="text-center border-b pb-3">
               <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
-                Pasarela de Pago Segura
+                {t('kiosk.gatewayBadge', 'Pasarela de Pago Segura')}
               </span>
-              <h3 className="text-xl font-black text-gray-800 mt-0.5">Confirmación de Pago</h3>
+              <h3 className="text-xl font-black text-gray-800 mt-0.5">
+                {t('kiosk.gatewayTitle', 'Confirmación de Pago')}
+              </h3>
               <p className="text-xs text-gray-500">
-                Elige tu medio de pago para procesar la comanda directamente a cocina.
+                {t('kiosk.gatewaySubtitle', 'Elige tu medio de pago para procesar la comanda directamente a cocina.')}
               </p>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-500 uppercase">Monto Total:</span>
+              <span className="text-xs font-bold text-gray-500 uppercase">
+                {t('kiosk.amountTotal', 'Monto Total:')}
+              </span>
               <span className="text-2xl font-black text-emerald-600">
                 {settings.currency} {totalCart.toFixed(2)}
               </span>
@@ -516,11 +587,11 @@ export const CustomerKioskPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-                Nombre del Cliente (Para llamarte cuando esté listo):
+                {t('kiosk.customerNameLabel', 'Nombre del Cliente (Para llamarte cuando esté listo):')}
               </label>
               <input
                 type="text"
-                placeholder="Ej. Juan Pérez"
+                placeholder={t('kiosk.customerNamePlaceholder', 'Ej. Juan Pérez')}
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold outline-none focus:border-red-500"
@@ -528,7 +599,9 @@ export const CustomerKioskPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-600 uppercase">Medio de Pago</label>
+              <label className="block text-xs font-bold text-gray-600 uppercase">
+                {t('kiosk.paymentMethodLabel', 'Medio de Pago')}
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -540,7 +613,7 @@ export const CustomerKioskPage: React.FC = () => {
                   }`}
                 >
                   <span className="text-xl">💳</span>
-                  <span>Tarjeta/POS</span>
+                  <span>{t('kiosk.cardPos', 'Tarjeta/POS')}</span>
                 </button>
 
                 <button
@@ -553,7 +626,7 @@ export const CustomerKioskPage: React.FC = () => {
                   }`}
                 >
                   <span className="text-xl">📱</span>
-                  <span>QR / Yape</span>
+                  <span>{t('kiosk.qrYape', 'QR')}</span>
                 </button>
 
                 <button
@@ -566,7 +639,7 @@ export const CustomerKioskPage: React.FC = () => {
                   }`}
                 >
                   <span className="text-xl">💵</span>
-                  <span>Efectivo</span>
+                  <span>{t('kiosk.cash', 'Efectivo')}</span>
                 </button>
               </div>
             </div>
@@ -578,7 +651,7 @@ export const CustomerKioskPage: React.FC = () => {
                 onClick={() => setIsPaymentModalOpen(false)}
                 className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl cursor-pointer"
               >
-                Cancelar
+                {t('common.cancel', 'Cancelar')}
               </button>
               <button
                 type="button"
@@ -586,7 +659,7 @@ export const CustomerKioskPage: React.FC = () => {
                 onClick={handleProcessPayment}
                 className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer shadow-sm"
               >
-                {isProcessingPayment ? 'Procesando Pago...' : '✓ Confirmar Pago'}
+                {isProcessingPayment ? t('kiosk.processingPayment', 'Procesando Pago...') : t('kiosk.confirmPaymentBtn', '✓ Confirmar Pago')}
               </button>
             </div>
           </div>

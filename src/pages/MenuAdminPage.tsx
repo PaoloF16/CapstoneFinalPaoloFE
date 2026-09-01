@@ -225,7 +225,7 @@ export const MenuAdminPage: React.FC = () => {
         <div className="w-full md:w-72">
           <input
             type="text"
-            placeholder={`🔍 ${t("menu.searchPlaceholder", "Buscar plato por nombre...")}`}
+            placeholder={` ${t("menu.searchPlaceholder", "Buscar plato por nombre...")}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"

@@ -1,7 +1,8 @@
 // src/components/menu/ProductModal.tsx
 import React, { useState, useEffect } from 'react';
-import type { MenuItem, Category, MenuItemFormData } from '../../types/menu';
+import { useLanguage } from '../../context/LanguageContext';
 import { useRestaurant } from '../../context/RestaurantContext';
+import type { MenuItem, Category, MenuItemFormData } from '../../types/menu';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   initialData,
   categories,
 }) => {
+  const { t } = useLanguage();
   const { settings } = useRestaurant();
 
   const [formData, setFormData] = useState<MenuItemFormData>({
@@ -27,29 +29,25 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     originalPrice: undefined,
     categoryId: '',
     imageUrl: '',
-    isAvailable: true,
-    isGlutenFree: false,
-    isNew: false,
     discountBadge: '',
+    isNew: false,
+    isGlutenFree: false,
+    isAvailable: true,
   });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
-      const catId = initialData.categoryId || initialData.category?.id || (categories[0]?.id ?? '');
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
         price: initialData.price || 0,
-        originalPrice: initialData.originalPrice ?? undefined,
-        categoryId: catId,
+        originalPrice: initialData.originalPrice,
+        categoryId: initialData.categoryId || initialData.category?.id || categories[0]?.id || '',
         imageUrl: initialData.imageUrl || '',
-        isAvailable: initialData.isAvailable ?? true,
-        isGlutenFree: initialData.isGlutenFree ?? false,
-        isNew: initialData.isNew ?? false,
         discountBadge: initialData.discountBadge || '',
+        isNew: initialData.isNew || false,
+        isGlutenFree: initialData.isGlutenFree || false,
+        isAvailable: initialData.isAvailable ?? true,
       });
     } else {
       setFormData({
@@ -59,123 +57,97 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         originalPrice: undefined,
         categoryId: categories[0]?.id || '',
         imageUrl: '',
-        isAvailable: true,
-        isGlutenFree: false,
-        isNew: false,
         discountBadge: '',
+        isNew: false,
+        isGlutenFree: false,
+        isAvailable: true,
       });
     }
-    setError(null);
   }, [initialData, categories, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (!formData.categoryId) {
-      setError('Por favor selecciona una categoría válida.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await onSubmit(formData);
-      onClose();
-    } catch (err: any) {
-      console.error('Error al guardar plato:', err);
-      const serverMessage =
-        err.response?.data?.message ||
-        err.response?.data ||
-        'Error al guardar el plato en el servidor.';
-      setError(typeof serverMessage === 'string' ? serverMessage : 'Error al guardar plato.');
-    } finally {
-      setLoading(false);
-    }
+    if (!formData.name.trim() || !formData.categoryId) return;
+    await onSubmit(formData);
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-gray-800">
-            {initialData ? 'Editar Plato' : 'Crear Nuevo Plato'}
-          </h3>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4 max-h-[90vh] overflow-y-auto select-none">
+        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+          <h2 className="text-lg font-bold text-gray-800">
+            {initialData
+              ? t('productModal.editTitle', 'Editar Plato')
+              : t('productModal.createTitle', 'Crear Nuevo Plato')}
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer"
+            className="text-gray-400 hover:text-gray-600 text-lg font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
-        {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-200">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-              Nombre del Plato
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('productModal.nameLabel', 'NOMBRE DEL PLATO')}
             </label>
             <input
               type="text"
               required
+              placeholder={t('productModal.namePlaceholder', 'Ej. Lomo Saltado')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ej. Lomo Saltado"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-              Categoría
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('productModal.categoryLabel', 'CATEGORÍA')}
             </label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-blue-500 bg-white"
               required
             >
-              <option value="" disabled>Seleccione una categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+              <option value="">{t('productModal.selectCategory', '-- Seleccionar Categoría --')}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-                Precio ({settings.currency})
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('productModal.priceLabel', 'PRECIO')} ({settings.currency})
               </label>
               <input
                 type="number"
                 step="0.01"
                 required
-                min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-                Precio Anterior ({settings.currency})
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('productModal.originalPriceLabel', 'PRECIO ANTERIOR')} ({settings.currency})
               </label>
               <input
                 type="number"
                 step="0.01"
-                min="0"
+                placeholder={t('productModal.optionalPlaceholder', 'Opcional')}
                 value={formData.originalPrice ?? ''}
                 onChange={(e) =>
                   setFormData({
@@ -183,104 +155,102 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     originalPrice: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
-                placeholder="Opcional"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2.5 border border-gray-300 rounded-xl text-xs outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-              Descripción
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('productModal.descLabel', 'DESCRIPCIÓN')}
             </label>
             <textarea
-              rows={3}
+              rows={2}
+              placeholder={t('productModal.descPlaceholder', 'Ingredientes o detalles...')}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Ingredientes o detalles..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-gray-300 rounded-xl text-xs outline-none focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-              URL Imagen (Opcional)
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              {t('productModal.imageLabel', 'URL IMAGEN (OPCIONAL)')}
             </label>
             <input
               type="url"
+              placeholder="https://..."
               value={formData.imageUrl}
               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-gray-300 rounded-xl text-xs outline-none focus:border-blue-500"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-                Etiqueta Descuento
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                {t('productModal.discountLabel', 'ETIQUETA DESCUENTO')}
               </label>
               <input
                 type="text"
-                placeholder="Ej. -15%"
-                value={formData.discountBadge || ''}
+                placeholder={t('productModal.discountPlaceholder', 'Ej. -15%')}
+                value={formData.discountBadge}
                 onChange={(e) => setFormData({ ...formData, discountBadge: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-xl text-xs outline-none focus:border-blue-500"
               />
             </div>
-            <div className="flex items-center pt-5 space-x-4">
-              <label className="flex items-center text-xs font-bold text-gray-700 cursor-pointer">
+
+            <div className="flex gap-4 pt-4 sm:pt-0">
+              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isNew}
                   onChange={(e) => setFormData({ ...formData, isNew: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2 cursor-pointer"
+                  className="rounded text-blue-600 focus:ring-blue-500"
                 />
-                NUEVO
+                <span>{t('productModal.isNew', 'NUEVO')}</span>
               </label>
-              <label className="flex items-center text-xs font-bold text-gray-700 cursor-pointer">
+
+              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isGlutenFree}
                   onChange={(e) => setFormData({ ...formData, isGlutenFree: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2 cursor-pointer"
+                  className="rounded text-amber-600 focus:ring-amber-500"
                 />
-                SIN GLUTEN
+                <span>{t('productModal.isGlutenFree', 'SIN GLUTEN')}</span>
               </label>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-            <input
-              type="checkbox"
-              id="isAvailable"
-              checked={formData.isAvailable}
-              onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 cursor-pointer"
-            />
-            <label htmlFor="isAvailable" className="text-sm text-gray-700 font-semibold cursor-pointer">
-              Plato disponible para venta
+          <div className="pt-2 border-t border-gray-100">
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-800 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isAvailable}
+                onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span>{t('productModal.isAvailable', 'Plato disponible para venta')}</span>
             </label>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+              className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
             >
-              Cancelar
+              {t('common.cancel', 'Cancelar')}
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-colors"
             >
-              {loading ? 'Guardando...' : initialData ? 'Actualizar Plato' : 'Guardar Plato'}
+              {t('productModal.saveBtn', 'Guardar Plato')}
             </button>
           </div>
         </form>
-
       </div>
     </div>
   );
