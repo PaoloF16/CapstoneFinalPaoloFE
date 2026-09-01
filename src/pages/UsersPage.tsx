@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 import { useLanguage } from '../context/LanguageContext';
 import type { User, Role, RoleFormData } from '../types/user';
+import { DeleteIcon, PencilIcon } from '../components/common/Icons';
 
 const PERMISSION_MODULES = [
   { id: 'TABLES', label: 'Mesas / Salón', actions: ['GET', 'POST', 'PUT', 'DELETE'] },
@@ -290,14 +291,14 @@ export const UsersPage: React.FC = () => {
                           onClick={() => handleOpenEditRole(r)}
                           className="p-1 hover:bg-gray-200 rounded text-gray-600 cursor-pointer"
                         >
-                          ✏️
+                          <PencilIcon className="w-3.5 h-3.5"/>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteRole(r)}
                           className="p-1 hover:bg-red-100 rounded text-red-600 cursor-pointer"
                         >
-                          🗑️
+                          <DeleteIcon className="w-3.5 h-3.5"/>
                         </button>
                       </div>
                     )}

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useRestaurant, type RestaurantSettings } from '../context/RestaurantContext';
 
+
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
   const { settings, updateSettings, resetSettings } = useRestaurant();

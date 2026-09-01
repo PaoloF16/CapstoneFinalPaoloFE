@@ -11,6 +11,7 @@ import type {
   MenuItemFormData,
   CategoryFormData,
 } from "../types/menu"
+import { DeleteIcon, PencilIcon } from "../components/common/Icons"
 
 export const MenuAdminPage: React.FC = () => {
   const { t } = useLanguage()
@@ -156,7 +157,6 @@ export const MenuAdminPage: React.FC = () => {
           >
             {t("menu.newCategory", "+ Nueva Categoría")}
           </button>
-          // Reemplaza el botón:
           <button
             type="button"
             onClick={handleOpenCreateProduct}
@@ -353,7 +353,7 @@ export const MenuAdminPage: React.FC = () => {
                       onClick={() => handleOpenEditProduct(product)}
                       className="px-2.5 py-1 bg-gray-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                     >
-                      ✏️
+                      <PencilIcon className="w-3.5 h-3.5"/>
                     </button>
                     <button
                       type="button"
@@ -362,7 +362,7 @@ export const MenuAdminPage: React.FC = () => {
                       }
                       className="px-2.5 py-1 bg-gray-100 hover:bg-red-50 hover:text-red-600 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                     >
-                      🗑️
+                      <DeleteIcon className="w-3.5 h-3.5"/>
                     </button>
                   </div>
                 </div>
