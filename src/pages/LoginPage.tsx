@@ -61,28 +61,33 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0f12] flex items-center justify-center p-4">
-      <div className="bg-[#181b22] border border-gray-800 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0b0e] via-[#111319] to-[#251307] flex items-center justify-center p-4 relative overflow-hidden select-none">
+      {/* Destellos ambientales de luz naranja */}
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-orange-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-120px] right-[-80px] w-[500px] h-[400px] bg-amber-600/10 rounded-full blur-[150px] pointer-events-none" />
+
+      {/* Tarjeta Blanca */}
+      <div className="bg-white text-gray-900 border border-gray-200/90 p-8 sm:p-10 rounded-3xl max-w-md w-full shadow-2xl space-y-6 relative z-10">
         {/* Logo & Header */}
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-red-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-lg shadow-red-600/30">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-black text-2xl flex items-center justify-center mx-auto shadow-lg shadow-orange-500/25 border border-orange-400/30">
             {settings.logoInitial}
           </div>
-          <h2 className="text-2xl font-black text-white">{settings.name}</h2>
-          <p className="text-xs text-gray-400">
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight">{settings.name}</h2>
+          <p className="text-xs text-gray-500 font-medium">
             Ingresa tus credenciales para acceder al sistema
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-950/50 border border-red-800 text-red-400 text-xs font-bold rounded-xl text-center">
+          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-xl text-center animate-in fade-in">
             ⚠️ {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1 tracking-wider">
               Correo Electrónico
             </label>
             <input
@@ -91,12 +96,12 @@ export const LoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@restaurante.com"
-              className="w-full bg-[#101216] border border-gray-700 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500"
+              className="w-full bg-gray-50 border border-gray-300 text-gray-900 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1 tracking-wider">
               Contraseña
             </label>
             <input
@@ -105,24 +110,24 @@ export const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-[#101216] border border-gray-700 text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500"
+              className="w-full bg-gray-50 border border-gray-300 text-gray-900 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-orange-500/25 transition-all cursor-pointer disabled:opacity-50 active:scale-98 mt-2"
           >
             {loading ? "Ingresando..." : "Iniciar Sesión"}
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-gray-800 text-xs text-gray-400">
+        <div className="text-center pt-2 border-t border-gray-100 text-xs text-gray-500 font-medium">
           ¿No tienes una cuenta?{" "}
           <Link
             to="/register"
-            className="text-red-400 font-bold hover:underline"
+            className="text-orange-600 font-bold hover:underline"
           >
             Regístrate aquí
           </Link>
@@ -132,4 +137,4 @@ export const LoginPage: React.FC = () => {
   )
 }
 
-export default LoginPage
+export default LoginPage;

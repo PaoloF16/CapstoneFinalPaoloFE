@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 import { useLanguage } from '../context/LanguageContext';
+import { PencilIcon, DeleteIcon } from '../components/common/Icons';
 import type { User, Role, RoleFormData } from '../types/user';
-import { DeleteIcon, PencilIcon } from '../components/common/Icons';
 
 const PERMISSION_MODULES = [
   { id: 'TABLES', label: 'Mesas / Salón', actions: ['GET', 'POST', 'PUT', 'DELETE'] },
@@ -20,13 +20,11 @@ export const UsersPage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modales
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
 
-  // Formularios
   const [userForm, setUserForm] = useState({
     name: '',
     email: '',
@@ -71,7 +69,6 @@ export const UsersPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // --- ACCIONES DE USUARIO ---
   const handleOpenCreateUser = async () => {
     setEditingUser(null);
     const availableRoles = await fetchRoles();
@@ -150,7 +147,6 @@ export const UsersPage: React.FC = () => {
     }
   };
 
-  // --- ACCIONES DE ROLES ---
   const handleOpenCreateRole = () => {
     setEditingRole(null);
     setRoleForm({ name: '', description: '', permissions: [] });
@@ -172,7 +168,7 @@ export const UsersPage: React.FC = () => {
       alert('No se pueden eliminar los roles base del sistema.');
       return;
     }
-    if (!window.confirm(`¿Eliminar el rol "${role.name}"? Los usuarios asignados quedarán sin rol.`)) return;
+    if (!window.confirm(`¿Eliminar el rol "${role.name}"?`)) return;
     try {
       await userService.deleteRole(role.id);
       await fetchData();
@@ -231,45 +227,47 @@ export const UsersPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 select-none">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-xs gap-4">
+    <div className="min-h-screen bg-[#0d0f14] p-6 max-w-7xl mx-auto space-y-6 select-none relative">
+      <div className="absolute top-0 left-1/3 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* HEADER (BLANCO) */}
+      <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-3xl border border-gray-200/80 shadow-md gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('users.title')}</h1>
-          <p className="text-xs text-gray-500 mt-1">{t('users.subtitle')}</p>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('users.title')}</h1>
+          <p className="text-xs text-gray-500 mt-0.5 font-medium">{t('users.subtitle')}</p>
         </div>
         <div className="flex gap-2.5">
           <button
             type="button"
             onClick={handleOpenCreateRole}
-            className="px-4 py-2 border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            className="px-4 py-2.5 border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-2xl text-xs font-bold transition-colors cursor-pointer"
           >
             {t('users.newRole')}
           </button>
           <button
             type="button"
             onClick={handleOpenCreateUser}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white rounded-2xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all cursor-pointer"
           >
             {t('users.newUser')}
           </button>
         </div>
       </div>
 
-      {/* LISTA DE ROLES */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs">
-        <h2 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+      {/* LISTA DE ROLES (BLANCA) */}
+      <div className="relative z-10 bg-white p-6 rounded-3xl border border-gray-200/80 shadow-md space-y-3">
+        <h2 className="text-xs font-black text-gray-800 uppercase tracking-wider">
           {t('users.rolesConfigured')}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {roles.map((r) => {
             const isSystemRole = r.name === 'SUPER_ADMIN' || r.name === 'ADMIN';
             return (
-              <div key={r.id} className="p-4 rounded-xl border border-gray-200 bg-gray-50/60 flex flex-col justify-between hover:shadow-xs transition-shadow">
+              <div key={r.id} className="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 flex flex-col justify-between hover:border-orange-300 transition-all">
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <span
-                      className={`px-2.5 py-0.5 rounded-md text-xs font-black tracking-wide ${
+                      className={`px-2.5 py-0.5 rounded-lg text-xs font-black tracking-wide ${
                         r.name === 'SUPER_ADMIN'
                           ? 'bg-red-100 text-red-700'
                           : r.name === 'ADMIN'
@@ -281,7 +279,7 @@ export const UsersPage: React.FC = () => {
                     </span>
 
                     {isSystemRole ? (
-                      <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase">
+                      <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-md font-bold uppercase">
                         {t('users.systemBadge')}
                       </span>
                     ) : (
@@ -289,23 +287,23 @@ export const UsersPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenEditRole(r)}
-                          className="p-1 hover:bg-gray-200 rounded text-gray-600 cursor-pointer"
+                          className="p-1 hover:bg-gray-200 rounded-lg text-gray-500 cursor-pointer"
                         >
-                          <PencilIcon className="w-3.5 h-3.5"/>
+                          <PencilIcon className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteRole(r)}
-                          className="p-1 hover:bg-red-100 rounded text-red-600 cursor-pointer"
+                          className="p-1 hover:bg-rose-100 rounded-lg text-rose-500 cursor-pointer"
                         >
-                          <DeleteIcon className="w-3.5 h-3.5"/>
+                          <DeleteIcon className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 line-clamp-2">{r.description || t('users.noDesc')}</p>
+                  <p className="text-xs text-gray-500 mt-2 line-clamp-2 font-medium">{r.description || t('users.noDesc')}</p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-gray-200 text-[11px] text-gray-500 flex justify-between items-center">
+                <div className="mt-3 pt-2 border-t border-gray-200 text-[11px] text-gray-400 flex justify-between items-center font-semibold">
                   <span>{t('users.permissionsCount')}</span>
                   <strong className="text-gray-800">{r.permissions?.length || (isSystemRole ? 'TOTAL' : 0)}</strong>
                 </div>
@@ -315,14 +313,14 @@ export const UsersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* TABLA DE USUARIOS */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+      {/* TABLA DE USUARIOS (BLANCA) */}
+      <div className="relative z-10 bg-white rounded-3xl border border-gray-200/80 shadow-md overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500 text-xs font-semibold">{t('common.loading')}</div>
+          <div className="p-16 text-center text-orange-400 text-xs font-bold">{t('common.loading')}</div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50 text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <tr className="border-b border-gray-100 bg-gray-50/70 text-xs font-bold text-gray-400 uppercase tracking-wider">
                 <th className="p-4 pl-6">{t('users.name')}</th>
                 <th className="p-4">{t('users.email')}</th>
                 <th className="p-4">{t('users.role')}</th>
@@ -335,12 +333,12 @@ export const UsersPage: React.FC = () => {
               {users.map((u) => {
                 const roleName = typeof u.role === 'object' && u.role ? (u.role as any).name : u.role || '---';
                 return (
-                  <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="p-4 pl-6 font-bold text-gray-800">{u.name}</td>
-                    <td className="p-4 text-gray-500">{u.email}</td>
+                  <tr key={u.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="p-4 pl-6 font-bold text-gray-900">{u.name}</td>
+                    <td className="p-4 text-gray-500 font-medium">{u.email}</td>
                     <td className="p-4">
                       <span
-                        className={`px-2.5 py-1 text-[11px] font-bold rounded-md ${
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg ${
                           roleName === 'SUPER_ADMIN'
                             ? 'bg-red-50 text-red-700 border border-red-200'
                             : roleName === 'ADMIN'
@@ -351,11 +349,11 @@ export const UsersPage: React.FC = () => {
                         {roleName}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-500 font-mono">{u.posPin ? '••••' : '---'}</td>
+                    <td className="p-4 text-gray-400 font-mono">{u.posPin ? '••••' : '---'}</td>
                     <td className="p-4">
                       <span
-                        className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase ${
-                          u.active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                        className={`px-2.5 py-1 text-[10px] font-black rounded-lg uppercase ${
+                          u.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500'
                         }`}
                       >
                         {u.active ? t('common.active') : t('common.inactive')}
@@ -396,91 +394,78 @@ export const UsersPage: React.FC = () => {
         )}
       </div>
 
-      {/* MODAL USUARIO */}
+      {/* MODAL USUARIO (OFF-WHITE SUAVE) */}
       {isUserModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-200 space-y-4">
-            <h2 className="text-lg font-bold text-gray-800">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#f8f9fc] rounded-3xl w-full max-w-md p-6 shadow-2xl border border-gray-200 space-y-4">
+            <h2 className="text-lg font-black text-gray-900">
               {editingUser ? t('common.edit') : t('users.newUser')}
             </h2>
             <form onSubmit={handleSaveUser} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">{t('users.name')}</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">{t('users.name')}</label>
                 <input
                   type="text"
                   required
                   value={userForm.name}
                   onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
-                  className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-red-500"
+                  className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-orange-500 text-gray-900"
                 />
               </div>
 
               {!editingUser && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 uppercase mb-1">{t('users.email')}</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">{t('users.email')}</label>
                   <input
                     type="email"
                     required
                     value={userForm.email}
                     onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-red-500"
+                    className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-orange-500 text-gray-900"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">{t('users.role')}</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">{t('users.role')}</label>
                 <select
                   value={userForm.roleId}
                   onChange={(e) => setUserForm({ ...userForm, roleId: e.target.value })}
-                  className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-red-500"
+                  className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs font-semibold outline-none focus:border-orange-500 text-gray-900"
                   required
                 >
                   <option value="">-- Seleccionar Rol --</option>
-                  <optgroup label="Roles del Sistema">
-                    {roles
-                      .filter((r) => r.name === 'SUPER_ADMIN' || r.name === 'ADMIN')
-                      .map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                  </optgroup>
-                  <optgroup label="Roles Personalizados">
-                    {roles
-                      .filter((r) => r.name !== 'SUPER_ADMIN' && r.name !== 'ADMIN')
-                      .map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                  </optgroup>
+                  {roles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-600 uppercase mb-1">{t('users.pin')}</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">{t('users.pin')}</label>
                 <input
                   type="password"
                   maxLength={4}
                   value={userForm.posPin}
                   onChange={(e) => setUserForm({ ...userForm, posPin: e.target.value })}
                   placeholder="Ej. 1234"
-                  className="w-full p-2.5 border border-gray-300 rounded-xl text-xs outline-none focus:border-red-500"
+                  className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs outline-none focus:border-orange-500 text-gray-900"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => setIsUserModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 cursor-pointer"
                 >
                   {t('common.save')}
                 </button>
@@ -490,41 +475,41 @@ export const UsersPage: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL CREAR / EDITAR ROL */}
+      {/* MODAL ROL (OFF-WHITE SUAVE) */}
       {isRoleModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto space-y-4">
-            <h2 className="text-lg font-bold text-gray-800">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#f8f9fc] rounded-3xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto space-y-4 text-gray-900">
+            <h2 className="text-lg font-black text-gray-900">
               {editingRole ? `Editar Rol: ${editingRole.name}` : t('users.newRole')}
             </h2>
             <form onSubmit={handleSaveRole} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Nombre del Rol</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre del Rol</label>
                   <input
                     type="text"
                     required
                     placeholder="Ej. CAJERO, COCINERO"
                     value={roleForm.name}
                     onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                    className="w-full p-2.5 border border-gray-300 rounded-xl text-xs font-bold uppercase outline-none focus:border-purple-500"
+                    className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs font-bold uppercase outline-none focus:border-purple-500 text-gray-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Descripción</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Descripción</label>
                   <input
                     type="text"
                     placeholder="Ej. Acceso a toma de comandas y caja"
                     value={roleForm.description}
                     onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
-                    className="w-full p-2.5 border border-gray-300 rounded-xl text-xs outline-none focus:border-purple-500"
+                    className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs outline-none focus:border-purple-500 text-gray-900"
                   />
                 </div>
               </div>
 
               {/* MATRIZ DE PERMISOS */}
-              <div className="border border-gray-200 rounded-xl overflow-hidden mt-3">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center text-xs font-bold text-gray-700 uppercase">
+              <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white mt-3">
+                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center text-xs font-bold text-gray-600 uppercase">
                   <span>Módulo</span>
                   <span>Acciones Permitidas</span>
                 </div>
@@ -578,20 +563,20 @@ export const UsersPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => {
                     setIsRoleModalOpen(false);
                     setEditingRole(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer"
                 >
                   {editingRole ? t('common.save') : 'Guardar Rol'}
                 </button>
