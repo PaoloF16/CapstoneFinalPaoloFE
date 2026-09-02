@@ -4,6 +4,11 @@ import { reportService, type AnalyticsData } from "../services/reportService"
 import { useRestaurant } from "../context/RestaurantContext"
 import { useAuth } from "../context/AuthContext"
 import { useLanguage } from "../context/LanguageContext"
+import {
+  RefreshIcon,
+  EndOfDayIcon,
+  PrintableReportIcon,
+} from "../components/common/Icons"
 
 type ReportPeriod = "DAILY" | "WEEKLY" | "MONTHLY" | "ANNUAL"
 
@@ -154,9 +159,10 @@ export const ReportsPage: React.FC = () => {
           <button
             type="button"
             onClick={loadReports}
-            className="px-3.5 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+            className="px-3.5 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl cursor-pointer transition-colors flex items-center gap-1.5"
           >
-            🔄 {t("reports.refresh", "Actualizar")}
+            <RefreshIcon className="w-4 h-4 text-gray-500" />
+            <span>{t("reports.refresh", "Actualizar")}</span>
           </button>
 
           {/* Botón Cierre / Nuevo Día */}
@@ -164,9 +170,10 @@ export const ReportsPage: React.FC = () => {
             <button
               type="button"
               onClick={handleStartNewDay}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors flex items-center gap-1.5"
             >
-              {t("reports.startNewDay")}
+              <RefreshIcon className="w-4 h-4" />
+              <span>{t("reports.startNewDay", "Empezar Nuevo Día")}</span>
             </button>
           ) : (
             <button
@@ -175,9 +182,10 @@ export const ReportsPage: React.FC = () => {
                 setCountedCash(expectedTotalInDrawer)
                 setIsCloseRegisterOpen(true)
               }}
-              className="px-4 py-2 bg-slate-800 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors"
+              className="px-4 py-2 bg-slate-800 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors flex items-center gap-1.5"
             >
-              {t("reports.closeRegister")}
+              <EndOfDayIcon className="w-4 h-4 text-amber-400" />
+              <span>{t("reports.closeRegister", "Cerrar Caja del Día")}</span>
             </button>
           )}
 
@@ -187,6 +195,7 @@ export const ReportsPage: React.FC = () => {
             onClick={() => setIsReportModalOpen(true)}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer transition-colors flex items-center gap-1.5"
           >
+            <PrintableReportIcon className="w-4 h-4" />
             <span>
               {t("reports.officialReport", "Descargo Oficial Imprimible")}
             </span>
@@ -273,7 +282,7 @@ export const ReportsPage: React.FC = () => {
             </h3>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
-            💵
+            
           </div>
         </div>
       </div>

@@ -271,7 +271,7 @@ export const KitchenDisplayPage: React.FC = () => {
                     <div>
                       <span className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider block">
                         {isTakeaway
-                          ? "🛍️ TAKEAWAY"
+                          ? " TAKEAWAY"
                           : `${t("kitchen.table", "Mesa")} #${order.table?.tableNumber || "?"}`}
                       </span>
                       <h3 className="text-2xl font-black text-white">
@@ -335,7 +335,7 @@ export const KitchenDisplayPage: React.FC = () => {
                         }
                         className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-black text-sm rounded-xl uppercase tracking-wider transition-transform active:scale-95 cursor-pointer shadow-lg shadow-blue-600/30"
                       >
-                        👨‍🍳 {t("kitchen.startPrep", "Empezar a Cocinar")}
+                         {t("kitchen.startPrep", "Empezar a Cocinar")}
                       </button>
                     ) : null}
 

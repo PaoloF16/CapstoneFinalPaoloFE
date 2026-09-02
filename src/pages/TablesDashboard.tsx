@@ -15,6 +15,7 @@ import { useLanguage } from "../context/LanguageContext"
 import type { RestaurantTable, Order } from "../types/restaurant"
 import type { MenuItem, Category } from "../types/menu"
 import { ChairIcon, PencilIcon, DeleteIcon } from "../components/common/Icons"
+import { CardIcon, CashIcon, PrintIcon } from "../components/common/Icons"
 
 interface CartItem {
   product: MenuItem
@@ -662,9 +663,10 @@ export const TablesDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="flex-1 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-black"
+                className="flex-1 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-black flex items-center justify-center gap-2"
               >
-                {t("tables.printTicket", "🖨️ Imprimir Ticket")}
+                <PrintIcon className="w-4 h-4" />
+                <span>{t("tables.printTicket", "Imprimir Ticket")}</span>
               </button>
               <button
                 type="button"
@@ -710,7 +712,8 @@ export const TablesDashboard: React.FC = () => {
                       : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
-                  {t("tables.cash", "💵 Efectivo")}
+                  <CashIcon className="w-4 h-4 text-emerald-600" />
+                  <span>{t("tables.cash", "Efectivo")}</span>
                 </button>
                 <button
                   type="button"
@@ -721,7 +724,8 @@ export const TablesDashboard: React.FC = () => {
                       : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
-                  {t("tables.card", "💳 Tarjeta / POS")}
+                  <CardIcon className="w-4 h-4 text-blue-600" />
+                  <span>{t("tables.card", "Tarjeta / POS")}</span>
                 </button>
               </div>
             </div>
