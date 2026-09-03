@@ -67,10 +67,3 @@ src/
 ├── App.tsx         # Main application structure and routing entry
 ├── main.tsx        # Application entry point
 └── index.css       # Global styling and custom variables
-
-
-Authentication & AuthorizationAuthentication is handled via secure credentials against the Spring Boot backend REST endpoints.User roles and permissions restrict administrative routes and POS actions.Quick POS PIN login support for restaurant floor staff.Getting StartedRequirementsNode.js (v18+ recommended)npmBrooklyn backend service running locally or remotely.InstallationClone the repository and install dependencies:Bashnpm install
-Create a .env file in the project root:Snippet di codiceVITE_API_URL=http://localhost:8080/api
-Start the development server:Bashnpm run dev
-Access the application in your browser at:http://localhost:5173Production BuildGenerate an optimized production bundle with TypeScript type-checking:Bashnpm run build
-The compiled output will be generated in the dist/ directory, ready for deployment to static hosting platforms such as Vercel or Netlify.Environment VariablesVariableDescriptionVITE_API_URLBase URL pointing to the Spring Boot backend REST API
