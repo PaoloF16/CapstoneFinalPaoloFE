@@ -2,7 +2,13 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useRestaurant, type RestaurantSettings } from '../context/RestaurantContext';
-
+import {
+  IdentityBrandIcon,
+  CurrencyIcon,
+  PreCheckReceiptsIcon,
+  LanguageSystemIcon,
+  SaveChangesIcon,
+} from '../components/common/Icons';
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
@@ -33,93 +39,117 @@ export const SettingsPage: React.FC = () => {
   const currentLang = String(language).toUpperCase();
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 select-none">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm gap-4">
+    <div className="min-h-screen bg-[#0d0f14] p-6 max-w-7xl mx-auto space-y-6 select-none relative">
+      {/* Glow ambiental naranja */}
+      <div className="absolute top-0 left-1/3 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* HEADER (TARJETA BLANCA) */}
+      <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white text-gray-900 p-6 rounded-3xl border border-gray-200/80 shadow-md gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('settings.title', 'Configuración del Restaurante')}</h1>
-          <p className="text-sm text-gray-500">{t('settings.subtitle', 'Personaliza la identidad de tu negocio, logo externo, moneda, precuenta e idioma del sistema.')}</p>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            {t('settings.title', 'Configuración del Restaurante')}
+          </h1>
+          <p className="text-xs text-gray-500 mt-1 font-medium">
+            {t('settings.subtitle', 'Personaliza la identidad de tu negocio, logo externo, moneda, precuenta e idioma del sistema.')}
+          </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={handleRestore}
-            className="px-4 py-2 border border-gray-300 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+            className="px-4 py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-2xl transition-colors cursor-pointer shadow-xs"
           >
             {t('settings.resetValues', 'Restaurar Valores')}
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold rounded-2xl shadow-md shadow-orange-500/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
           >
-            
+            <SaveChangesIcon className="w-4 h-4" />
             <span>{t('settings.saveChanges', 'Guardar Cambios')}</span>
           </button>
         </div>
       </div>
 
+      {/* ALERTA DE GUARDADO EXITOSO */}
       {saveSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-bold rounded-2xl animate-in fade-in">
-          ✓ {t('settings.saveSuccess', 'Configuración guardada y aplicada exitosamente a todo el sistema.')}
+        <div className="relative z-10 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl animate-in fade-in flex items-center gap-2 shadow-xs">
+          <span>✓</span>
+          <span>{t('settings.saveSuccess', 'Configuración guardada y aplicada exitosamente a todo el sistema.')}</span>
         </div>
       )}
 
-      {/* PESTAÑAS */}
-      <div className="flex gap-2 border-b border-gray-200 pb-2 overflow-x-auto scrollbar-none">
+      {/* PESTAÑAS DE NAVEGACIÓN */}
+      <div className="relative z-10 flex gap-2 border-b border-gray-800/80 pb-3 overflow-x-auto scrollbar-none">
         <button
           type="button"
           onClick={() => setActiveTab('general')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'general' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+            activeTab === 'general'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-xs'
           }`}
         >
-          🏪 {t('settings.tabIdentity', 'Identidad y Marca')}
+          <IdentityBrandIcon className="w-4 h-4" />
+          <span>{t('settings.tabIdentity', 'Identidad y Marca')}</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('financial')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'financial' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+            activeTab === 'financial'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-xs'
           }`}
         >
-          💰 {t('settings.tabCurrency', 'Moneda e Impuestos')}
+          <CurrencyIcon className="w-4 h-4" />
+          <span>{t('settings.tabCurrency', 'Moneda e Impuestos')}</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('ticket')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'ticket' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+            activeTab === 'ticket'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-xs'
           }`}
         >
-          🧾 {t('settings.tabTickets', 'Precuenta y Tickets')}
+          <PreCheckReceiptsIcon className="w-4 h-4" />
+          <span>{t('settings.tabTickets', 'Precuenta y Tickets')}</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('system')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'system' ? 'bg-red-600 text-white shadow-sm' : 'bg-white text-gray-600 border hover:bg-gray-50'
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+            activeTab === 'system'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 shadow-xs'
           }`}
         >
-          🌐 {t('settings.tabSystem', 'Idioma y Sistema')}
+          <LanguageSystemIcon className="w-4 h-4" />
+          <span>{t('settings.tabSystem', 'Idioma y Sistema')}</span>
         </button>
       </div>
 
       {/* CONTENIDO PRINCIPAL */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* FORMULARIO */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-5">
-          <form onSubmit={handleSave} className="space-y-4">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* FORMULARIO (TARJETA BLANCA) */}
+        <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-3xl border border-gray-200/80 shadow-md space-y-6 text-gray-900">
+          <form onSubmit={handleSave} className="space-y-5">
             {/* PESTAÑA: IDENTIDAD Y MARCA */}
             {activeTab === 'general' && (
               <div className="space-y-4 animate-in fade-in">
-                <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
+                <h3 className="font-black text-xs text-gray-800 uppercase tracking-wider border-b border-gray-100 pb-2.5">
                   {t('settings.sectionBusiness', 'DATOS DE LA EMPRESA Y LOGOTIPO')}
                 </h3>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                     {t('settings.businessName', 'NOMBRE COMERCIAL DEL RESTAURANTE')}
                   </label>
                   <input
@@ -128,12 +158,12 @@ export const SettingsPage: React.FC = () => {
                     value={formState.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="Ej. El Mesón Criollo"
-                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-semibold text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                     {t('settings.slogan', 'ESLOGAN O SUBTÍTULO')}
                   </label>
                   <input
@@ -141,13 +171,13 @@ export const SettingsPage: React.FC = () => {
                     value={formState.slogan}
                     onChange={(e) => handleInputChange('slogan', e.target.value)}
                     placeholder="Ej. Sabores que conquistan"
-                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none transition-all"
                   />
                 </div>
 
-                {/* LOGO: IMAGEN EXTERNA E INICIAL */}
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
-                  <span className="text-xs font-extrabold text-gray-700 uppercase tracking-wider block">
+                {/* LOGO: PREVIEW Y CAMPOS */}
+                <div className="p-4 bg-[#f8f9fc] rounded-2xl border border-gray-200/80 space-y-3">
+                  <span className="text-xs font-black text-gray-700 uppercase tracking-wider block">
                     {t('settings.logoTitle', 'Logotipo del Restaurante')}
                   </span>
 
@@ -163,7 +193,7 @@ export const SettingsPage: React.FC = () => {
                           }}
                         />
                       ) : (
-                        <span className="font-black text-xl text-red-600">{formState.logoInitial || 'T'}</span>
+                        <span className="font-black text-xl text-orange-600">{formState.logoInitial || 'T'}</span>
                       )}
                     </div>
 
@@ -177,7 +207,7 @@ export const SettingsPage: React.FC = () => {
                           value={formState.logoUrl || ''}
                           onChange={(e) => handleInputChange('logoUrl', e.target.value)}
                           placeholder="https://tu-servidor.com/logo.png"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                         />
                       </div>
                     </div>
@@ -192,14 +222,14 @@ export const SettingsPage: React.FC = () => {
                       maxLength={2}
                       value={formState.logoInitial}
                       onChange={(e) => handleInputChange('logoInitial', e.target.value.toUpperCase())}
-                      className="w-20 px-3 py-1.5 border border-gray-300 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                      className="w-20 px-3 py-1.5 bg-white border border-gray-300 rounded-xl text-xs font-black text-center text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       {t('settings.taxId', 'RUC / NIF / CIF (IDENTIFICADOR FISCAL)')}
                     </label>
                     <input
@@ -207,11 +237,11 @@ export const SettingsPage: React.FC = () => {
                       value={formState.taxId}
                       onChange={(e) => handleInputChange('taxId', e.target.value)}
                       placeholder="Ej. 20609876541"
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-mono font-semibold focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       {t('settings.phone', 'TELÉFONO / WHATSAPP')}
                     </label>
                     <input
@@ -219,14 +249,14 @@ export const SettingsPage: React.FC = () => {
                       value={formState.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="Ej. +51 987654321"
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       {t('settings.email', 'CORREO ELECTRÓNICO')}
                     </label>
                     <input
@@ -234,11 +264,11 @@ export const SettingsPage: React.FC = () => {
                       value={formState.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="admin@mirestaurante.com"
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       {t('settings.address', 'DIRECCIÓN DEL LOCAL')}
                     </label>
                     <input
@@ -246,7 +276,7 @@ export const SettingsPage: React.FC = () => {
                       value={formState.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       placeholder="Ej. Av. Larco 456, Lima"
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                 </div>
@@ -256,19 +286,19 @@ export const SettingsPage: React.FC = () => {
             {/* PESTAÑA: MONEDA E IMPUESTOS */}
             {activeTab === 'financial' && (
               <div className="space-y-4 animate-in fade-in">
-                <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
+                <h3 className="font-black text-xs text-gray-800 uppercase tracking-wider border-b border-gray-100 pb-2.5">
                   {t('settings.tabCurrency', 'Moneda y Configuración Fiscal')}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       {t('settings.currencyConfigured', 'Símbolo Moneda')}
                     </label>
                     <select
                       value={formState.currency}
                       onChange={(e) => handleInputChange('currency', e.target.value)}
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-bold bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     >
                       <option value="S/">S/ (Soles - Perú)</option>
                       <option value="$">$ (Dólares / Pesos)</option>
@@ -280,7 +310,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       Impuesto / IGV / IVA (%)
                     </label>
                     <input
@@ -289,12 +319,12 @@ export const SettingsPage: React.FC = () => {
                       max="50"
                       value={formState.taxRate}
                       onChange={(e) => handleInputChange('taxRate', Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                       Servicio Sugerido (%)
                     </label>
                     <input
@@ -303,7 +333,7 @@ export const SettingsPage: React.FC = () => {
                       max="30"
                       value={formState.serviceFeeRate}
                       onChange={(e) => handleInputChange('serviceFeeRate', Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-red-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                     />
                   </div>
                 </div>
@@ -313,12 +343,12 @@ export const SettingsPage: React.FC = () => {
             {/* PESTAÑA: PRECUENTA Y TICKETS */}
             {activeTab === 'ticket' && (
               <div className="space-y-4 animate-in fade-in">
-                <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
+                <h3 className="font-black text-xs text-gray-800 uppercase tracking-wider border-b border-gray-100 pb-2.5">
                   {t('settings.tabTickets', 'Personalización de Comprobante / Precuenta')}
                 </h3>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                     Texto de Cabecera en Ticket
                   </label>
                   <input
@@ -326,12 +356,12 @@ export const SettingsPage: React.FC = () => {
                     value={formState.ticketHeader}
                     onChange={(e) => handleInputChange('ticketHeader', e.target.value)}
                     placeholder="PRECUENTA DE CONSUMO"
-                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1.5">
                     Mensaje de Pie de Página
                   </label>
                   <textarea
@@ -339,7 +369,7 @@ export const SettingsPage: React.FC = () => {
                     value={formState.ticketFooter}
                     onChange={(e) => handleInputChange('ticketFooter', e.target.value)}
                     placeholder="¡Gracias por su visita! Síganos en @mirestaurante"
-                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none"
                   />
                 </div>
               </div>
@@ -348,18 +378,18 @@ export const SettingsPage: React.FC = () => {
             {/* PESTAÑA: IDIOMA Y SISTEMA */}
             {activeTab === 'system' && (
               <div className="space-y-4 animate-in fade-in">
-                <h3 className="font-bold text-sm text-gray-800 uppercase tracking-wider border-b pb-2">
+                <h3 className="font-black text-xs text-gray-800 uppercase tracking-wider border-b border-gray-100 pb-2.5">
                   {t('settings.tabSystem', 'Idioma y Preferencias de Interfaz')}
                 </h3>
 
                 <div className="max-w-xs">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                  <label className="block text-xs font-bold text-gray-600 uppercase mb-2">
                     Selecciona un idioma
                   </label>
                   <select
                     value={currentLang}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-red-500 outline-none cursor-pointer bg-white"
+                    className="w-full p-3 bg-gray-50 border border-gray-300 rounded-2xl text-xs font-bold text-gray-800 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 outline-none cursor-pointer"
                   >
                     <option value="ES">🇪🇸 Español</option>
                     <option value="EN">🇬🇧 English</option>
@@ -369,10 +399,10 @@ export const SettingsPage: React.FC = () => {
               </div>
             )}
 
-            <div className="pt-4 border-t flex justify-end">
+            <div className="pt-4 border-t border-gray-100 flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-transform active:scale-95"
+                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-orange-500/20 cursor-pointer transition-transform active:scale-95"
               >
                 {t('settings.saveConfigBtn', 'GUARDAR CONFIGURACIÓN')}
               </button>
@@ -380,15 +410,15 @@ export const SettingsPage: React.FC = () => {
           </form>
         </div>
 
-        {/* COLUMNA DERECHA: LIVE PREVIEW DEL TICKET */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+        {/* COLUMNA DERECHA: LIVE PREVIEW DEL TICKET (TARJETA BLANCA) */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-md flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-xs text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <h3 className="font-black text-xs text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span>👁️</span> {t('settings.ticketPreview', 'VISTA PREVIA DEL TICKET')}
             </h3>
 
-            {/* Simulación Ticket Térmico */}
-            <div className="bg-amber-50/40 p-5 rounded-xl border border-dashed border-gray-300 font-mono text-xs text-gray-800 space-y-3 shadow-inner">
+            {/* Simulación Ticket Térmico en papel suave */}
+            <div className="bg-[#fcfbf9] p-5 rounded-2xl border-2 border-dashed border-gray-300 font-mono text-xs text-gray-800 space-y-3 shadow-inner">
               <div className="text-center space-y-1 border-b border-gray-300 pb-3">
                 {formState.logoUrl && (
                   <img
@@ -406,7 +436,7 @@ export const SettingsPage: React.FC = () => {
                 <p className="text-[10px] text-gray-600">RUC/NIF: {formState.taxId || '-'}</p>
                 <p className="text-[10px] text-gray-600">{formState.address || '-'}</p>
                 <p className="text-[10px] text-gray-600">Tel: {formState.phone || '-'}</p>
-                <p className="text-[9px] text-red-600 font-bold uppercase mt-1">{formState.ticketHeader}</p>
+                <p className="text-[9px] text-orange-600 font-bold uppercase mt-1">{formState.ticketHeader}</p>
               </div>
 
               <div className="flex justify-between text-[11px] font-bold border-b border-gray-200 pb-1">
@@ -446,10 +476,10 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 p-3 bg-gray-50 rounded-xl text-center">
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-2xl text-center">
             <span className="text-xs text-gray-500 font-bold">
               {t('settings.currencyConfigured', 'Moneda configurada:')}{' '}
-              <span className="text-red-600 font-black">{formState.currency}</span>
+              <span className="text-orange-600 font-black">{formState.currency}</span>
             </span>
           </div>
         </div>
