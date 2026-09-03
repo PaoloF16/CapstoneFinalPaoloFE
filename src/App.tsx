@@ -11,17 +11,17 @@ export const App: React.FC = () => {
   return (
     <>
       {isAuthenticated ? (
-        <div className="flex h-screen bg-[#18191c] overflow-hidden">
+        <div className="flex h-screen bg-[#0d0f14] overflow-hidden select-none">
           <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0d0f14]">
             <Navbar />
-            <main className="flex-1 overflow-y-auto bg-gray-100">
+            <main className="flex-1 overflow-y-auto bg-[#0d0f14]">
               <AppRouter />
             </main>
           </div>
         </div>
       ) : (
-        <main className="min-h-screen bg-gray-100">
+        <main className="min-h-screen bg-[#0d0f14]">
           <AppRouter />
         </main>
       )}

@@ -16,6 +16,7 @@ export interface RestaurantSettings {
   serviceFeeRate: number;
   ticketHeader: string;
   ticketFooter: string;
+  
 }
 
 const DEFAULT_SETTINGS: RestaurantSettings = {
