@@ -1,4 +1,3 @@
-// src/pages/InventoryPage.tsx
 import React, { useEffect, useState } from 'react';
 import { inventoryService, type Ingredient } from '../services/inventoryService';
 

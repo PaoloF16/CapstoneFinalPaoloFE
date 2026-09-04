@@ -1,4 +1,3 @@
-// src/services/inventoryService.ts
 import api from './api';
 
 export interface Ingredient {

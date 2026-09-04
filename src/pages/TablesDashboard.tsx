@@ -1,4 +1,3 @@
-// src/pages/TablesDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import {
   getTables,

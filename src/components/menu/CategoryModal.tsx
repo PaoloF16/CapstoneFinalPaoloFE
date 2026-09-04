@@ -1,4 +1,3 @@
-// src/components/menu/CategoryModal.tsx
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import type { Category, CategoryFormData } from '../../types/menu';

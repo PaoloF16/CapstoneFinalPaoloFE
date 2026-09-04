@@ -1,4 +1,3 @@
-// src/pages/KitchenDisplayPage.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
   getKitchenOrders,

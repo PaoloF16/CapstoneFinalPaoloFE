@@ -1,4 +1,3 @@
-// src/components/tables/CreateTableModal.tsx
 import React, { useState, useEffect } from 'react';
 import type { RestaurantTable } from '../../types/restaurant';
 
@@ -22,7 +21,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
   const [capacity, setCapacity] = useState<number>(4);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // --- RELLENAR DATOS EN MODO EDICIÓN ---
+ 
   useEffect(() => {
     if (initialData) {
       setTableNumber(initialData.tableNumber);
@@ -35,7 +34,7 @@ export const CreateTableModal: React.FC<CreateTableModalProps> = ({
 
   if (!isOpen) return null;
 
-  // --- MANEJADOR DE ENVÍO ---
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

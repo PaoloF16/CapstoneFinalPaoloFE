@@ -1,4 +1,3 @@
-// src/components/tables/CheckoutModal.tsx
 import React, { useState } from 'react';
 import type { RestaurantTable as Table, Order } from '../../types/restaurant';
 import { checkoutOrder } from '../../services/restaurantService';

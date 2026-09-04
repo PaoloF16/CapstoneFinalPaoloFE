@@ -1,4 +1,3 @@
-// src/components/tables/TableCard.tsx
 import React from 'react';
 import type { TableStatus } from '../../types/restaurant';
 

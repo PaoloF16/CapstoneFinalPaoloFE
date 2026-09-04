@@ -1,4 +1,3 @@
-// src/pages/UsersPage.tsx
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 import { useLanguage } from '../context/LanguageContext';

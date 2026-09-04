@@ -1,4 +1,3 @@
-// src/pages/MenuAdminPage.tsx
 import React, { useEffect, useState } from 'react';
 import { menuService } from '../services/menuService';
 import { ProductModal } from '../components/menu/ProductModal';

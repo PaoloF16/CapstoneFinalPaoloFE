@@ -1,4 +1,3 @@
-// src/routes/AppRouter.tsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -40,14 +39,14 @@ const RootRedirect: React.FC = () => {
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
-      {/* 🔓 Públicas */}
+      {/* Públicas */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/mobile/login" element={<MobileLoginPage />} />
       <Route path="/kiosk" element={<CustomerKioskPage />} />
       <Route path="/order" element={<CustomerKioskPage />} />
 
-      {/* 🔒 Protegidas por Rol */}
+      {/*  Protegidas por Rol */}
       <Route
         path="/tables"
         element={

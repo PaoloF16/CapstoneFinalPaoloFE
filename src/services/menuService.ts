@@ -1,4 +1,3 @@
-// src/services/menuService.ts
 import api from './api';
 import type { MenuItem, Category, MenuItemFormData, CategoryFormData } from '../types/menu';
 

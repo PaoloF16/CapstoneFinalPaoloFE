@@ -1,4 +1,3 @@
-// src/components/menu/DeleteConfirmModal.tsx
 import React from 'react';
 
 interface DeleteConfirmModalProps {

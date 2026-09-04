@@ -1,4 +1,3 @@
-// src/pages/CustomerKioskPage.tsx
 import React, { useState, useEffect } from 'react';
 import { kioskService, type SelfOrderPayload } from '../services/kioskService';
 import { useRestaurant } from '../context/RestaurantContext';

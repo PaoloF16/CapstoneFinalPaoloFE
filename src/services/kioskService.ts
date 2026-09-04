@@ -1,4 +1,3 @@
-// src/services/kioskService.ts
 import axios from 'axios';
 import type { Category, MenuItem } from '../types/menu';
 import type { RestaurantTable, Order } from '../types/restaurant';

@@ -1,11 +1,11 @@
-// src/context/RestaurantContext.tsx
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface RestaurantSettings {
   name: string;
   slogan: string;
   logoInitial: string;
-  logoUrl?: string; // 👈 NUEVO: URL de imagen externa
+  logoUrl?: string; // 
   brandColor: string;
   phone: string;
   email: string;

@@ -1,4 +1,3 @@
-// src/services/restaurantService.ts
 import axios from 'axios';
 import type { RestaurantTable, Order, OrderStatus } from '../types/restaurant';
 

@@ -1,4 +1,3 @@
-// src/pages/ReportsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { reportService, type AnalyticsData } from '../services/reportService';
 import { useRestaurant } from '../context/RestaurantContext';

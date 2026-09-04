@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.tsx
 import React from 'react';
 import { useLanguage, type Language } from '../../context/LanguageContext';
 import { useRestaurant } from '../../context/RestaurantContext';

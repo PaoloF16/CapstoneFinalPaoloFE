@@ -1,4 +1,3 @@
-// src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRestaurant } from '../context/RestaurantContext';
